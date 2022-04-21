@@ -11,14 +11,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-	<repositories>
-		<repository>
-			<id>basex</id>
-			<name>BaseX Maven Repository</name>
-			<url>http://files.basex.org/maven</url>
-		</repository>
-	</repositories>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -62,10 +54,6 @@
 			<artifactId>antlr4-runtime</artifactId>
 			<version>4.10.1</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/net.sf.saxon/saxon-xqj -->
-		<!-- <dependency> <groupId>net.sf.saxon</groupId> <artifactId>saxon-xqj</artifactId> 
-			<version>9.1.0.8</version> </dependency> -->
-		<!-- https://mvnrepository.com/artifact/net.sf.saxon/Saxon-HE -->
 		<dependency>
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>Saxon-HE</artifactId>
@@ -89,16 +77,6 @@
 			<artifactId>junit-jupiter-engine</artifactId>
 			<version>5.8.2</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.basex</groupId>
-			<artifactId>basex</artifactId>
-			<version>9.7</version>
-		</dependency>
-		<dependency>
-			<groupId>org.basex</groupId>
-			<artifactId>basex-api</artifactId>
-			<version>9.7</version>
 		</dependency>
 	</dependencies>
 </project>
