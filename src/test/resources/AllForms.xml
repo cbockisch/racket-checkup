@@ -161,7 +161,7 @@
 	<comment>; comment lambda2
 	</comment>
 	<paren type='round' line='19'>
-		<terminal value='λ' line='19' type='Name' />
+		<terminal value='lambda' line='19' type='Name' />
 		<paren type='round' line='19'>
 			<terminal value='w' line='19' type='Name' />
 			<terminal value='z' line='19' type='Name' />

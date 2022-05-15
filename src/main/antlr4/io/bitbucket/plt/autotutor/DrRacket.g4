@@ -52,7 +52,7 @@ expr*
 expr : terminal | round_paren | square_paren | quote | quasiquote | unquote | vector;
 
 terminal : 
-string_terminal | hash_terminal | true_terminal | false_terminal | symbol_terminal | name_terminal | number_terminal | character_terminal;
+string_terminal | hash_terminal | true_terminal | false_terminal | symbol_terminal | name_terminal | number_terminal | character_terminal | lambda_terminal;
 
 string_terminal : STRING
 {
@@ -82,6 +82,12 @@ symbol_terminal : SYMBOL
 {
     comments($SYMBOL);
     xml.append("<terminal value='" + escapeXml($SYMBOL.text) + "' line='" + $SYMBOL.line + "' type='Symbol'/>");
+} ;
+
+lambda_terminal : LAMBDA
+{
+    comments($LAMBDA);
+    xml.append("<terminal value='lambda' line='" + $LAMBDA.line + "' type='Name'/>");
 } ;
 
 name_terminal : NAME
@@ -204,6 +210,10 @@ STRING:
 CHARACTER
     : '#' '\u005C' [A-Za-z0-9]
     | '#' '\u005C' 'space'
+    ;
+
+LAMBDA 
+    : 'λ'
     ;
 
 NAME :

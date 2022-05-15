@@ -42,7 +42,6 @@ class ParserTest {
 		String xml = parser.xml.toString();
 
 		Diff myDiff = DiffBuilder.compare(xmlFile).withTest(xml).checkForSimilar().ignoreWhitespace().build();
-		System.out.println(myDiff.toString());
 		assertFalse(myDiff.hasDifferences(), myDiff.toString());
 	}
 
