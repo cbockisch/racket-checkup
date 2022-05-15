@@ -1,0 +1,182 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+<drracket>
+	<comment>
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+	</comment>
+	<terminal value='#reader' line='3' type='HashName' />
+	<paren type='round' line='3'>
+		<terminal value='lib' line='3' type='Name' />
+		<terminal value='&quot;htdp-intermediate-reader.ss&quot;'
+			line='3' type='String' />
+		<terminal value='&quot;lang&quot;' line='3' type='String' />
+	</paren>
+	<paren type='round' line='3'>
+		<paren type='round' line='3'>
+			<terminal value='modname' line='3' type='Name' />
+			<terminal value='TerminalsParserTest' line='3' type='Name' />
+		</paren>
+		<paren type='round' line='3'>
+			<terminal value='read-case-sensitive' line='3' type='Name' />
+			<terminal value='true' line='3' type='Boolean' />
+		</paren>
+		<paren type='round' line='3'>
+			<terminal value='teachpacks' line='3' type='Name' />
+			<paren type='round' line='3'>
+				<paren type='round' line='3'>
+					<terminal value='lib' line='3' type='Name' />
+					<terminal value='&quot;universe.rkt&quot;' line='3'
+						type='String' />
+					<terminal value='&quot;teachpack&quot;' line='3'
+						type='String' />
+					<terminal value='&quot;2htdp&quot;' line='3' type='String' />
+				</paren>
+				<paren type='round' line='3'>
+					<terminal value='lib' line='3' type='Name' />
+					<terminal value='&quot;image.rkt&quot;' line='3'
+						type='String' />
+					<terminal value='&quot;teachpack&quot;' line='3'
+						type='String' />
+					<terminal value='&quot;2htdp&quot;' line='3' type='String' />
+				</paren>
+			</paren>
+		</paren>
+		<paren type='round' line='3'>
+			<terminal value='htdp-settings' line='3' type='Name' />
+			<vector line='3'>
+				<paren type='round' line='3'>
+					<terminal value='true' line='3' type='Boolean' />
+					<terminal value='constructor' line='3' type='Name' />
+					<terminal value='repeating-decimal' line='3' type='Name' />
+					<terminal value='false' line='3' type='Boolean' />
+					<terminal value='true' line='3' type='Boolean' />
+					<terminal value='none' line='3' type='Name' />
+					<terminal value='false' line='3' type='Boolean' />
+					<paren type='round' line='3'>
+						<paren type='round' line='3'>
+							<terminal value='lib' line='3' type='Name' />
+							<terminal value='&quot;universe.rkt&quot;' line='3'
+								type='String' />
+							<terminal value='&quot;teachpack&quot;' line='3'
+								type='String' />
+							<terminal value='&quot;2htdp&quot;' line='3'
+								type='String' />
+						</paren>
+						<paren type='round' line='3'>
+							<terminal value='lib' line='3' type='Name' />
+							<terminal value='&quot;image.rkt&quot;' line='3'
+								type='String' />
+							<terminal value='&quot;teachpack&quot;' line='3'
+								type='String' />
+							<terminal value='&quot;2htdp&quot;' line='3'
+								type='String' />
+						</paren>
+					</paren>
+					<terminal value='false' line='3' type='Boolean' />
+				</paren>
+			</vector>
+		</paren>
+	</paren>
+	<paren type='round' line='4'>
+		<terminal value='define' line='4' type='Name' />
+		<terminal value='NUMBER1' line='4' type='Name' />
+		<terminal value='1' line='4' type='Number' />
+	</paren>
+	<paren type='round' line='5'>
+		<terminal value='define' line='5' type='Name' />
+		<terminal value='NUMBER2' line='5' type='Name' />
+		<terminal value='0' line='5' type='Number' />
+	</paren>
+	<paren type='round' line='6'>
+		<terminal value='define' line='6' type='Name' />
+		<terminal value='NUMBER3' line='6' type='Name' />
+		<terminal value='1.2' line='6' type='Number' />
+	</paren>
+	<paren type='round' line='7'>
+		<terminal value='define' line='7' type='Name' />
+		<terminal value='NUMBER4' line='7' type='Name' />
+		<terminal value='4/5' line='7' type='Number' />
+	</paren>
+	<paren type='round' line='8'>
+		<terminal value='define' line='8' type='Name' />
+		<terminal value='NUMBER5' line='8' type='Name' />
+		<terminal value='-1' line='8' type='Number' />
+	</paren>
+	<paren type='round' line='9'>
+		<terminal value='define' line='9' type='Name' />
+		<terminal value='STRING1' line='9' type='Name' />
+		<terminal value='&quot;&quot;' line='9' type='String' />
+	</paren>
+	<paren type='round' line='10'>
+		<terminal value='define' line='10' type='Name' />
+		<terminal value='STRING2' line='10' type='Name' />
+		<terminal value='&quot;a b&quot;' line='10' type='String' />
+	</paren>
+	<paren type='round' line='11'>
+		<terminal value='define' line='11' type='Name' />
+		<terminal value='STRING3' line='11' type='Name' />
+		<terminal value='&quot;a&quot;&quot;b&quot;' line='11'
+			type='String' />
+	</paren>
+	<paren type='round' line='12'>
+		<terminal value='define' line='12' type='Name' />
+		<terminal value='STRING4' line='12' type='Name' />
+		<terminal value='&quot;a\&quot;\nb&quot;' line='12'
+			type='String' />
+	</paren>
+	<paren type='round' line='13'>
+		<terminal value='define' line='13' type='Name' />
+		<terminal value='SYMBOL1' line='13' type='Name' />
+		<terminal value='&apos;a' line='13' type='Symbol' />
+	</paren>
+	<paren type='round' line='14'>
+		<terminal value='define' line='14' type='Name' />
+		<terminal value='TRUE1' line='14' type='Name' />
+		<terminal value='true' line='14' type='Boolean' />
+	</paren>
+	<paren type='round' line='15'>
+		<terminal value='define' line='15' type='Name' />
+		<terminal value='TRUE2' line='15' type='Name' />
+		<terminal value='true' line='15' type='Boolean' />
+	</paren>
+	<paren type='round' line='16'>
+		<terminal value='define' line='16' type='Name' />
+		<terminal value='TRUE3' line='16' type='Name' />
+		<terminal value='true' line='16' type='Boolean' />
+	</paren>
+	<paren type='round' line='17'>
+		<terminal value='define' line='17' type='Name' />
+		<terminal value='TRUE4' line='17' type='Name' />
+		<terminal value='true' line='17' type='Boolean' />
+	</paren>
+	<paren type='round' line='18'>
+		<terminal value='define' line='18' type='Name' />
+		<terminal value='FALSE1' line='18' type='Name' />
+		<terminal value='false' line='18' type='Boolean' />
+	</paren>
+	<paren type='round' line='19'>
+		<terminal value='define' line='19' type='Name' />
+		<terminal value='FALSE2' line='19' type='Name' />
+		<terminal value='false' line='19' type='Boolean' />
+	</paren>
+	<paren type='round' line='20'>
+		<terminal value='define' line='20' type='Name' />
+		<terminal value='FALSE3' line='20' type='Name' />
+		<terminal value='false' line='20' type='Boolean' />
+	</paren>
+	<paren type='round' line='21'>
+		<terminal value='define' line='21' type='Name' />
+		<terminal value='FALSE4' line='21' type='Name' />
+		<terminal value='false' line='21' type='Boolean' />
+	</paren>
+	<paren type='round' line='22'>
+		<terminal value='define' line='22' type='Name' />
+		<terminal value='CHARACTER1' line='22' type='Name' />
+		<terminal value='#\space' line='22' type='Character' />
+	</paren>
+	<paren type='round' line='23'>
+		<terminal value='define' line='23' type='Name' />
+		<terminal value='CHARACTER2' line='23' type='Name' />
+		<terminal value='#\a' line='23' type='Character' />
+	</paren>
+</drracket>

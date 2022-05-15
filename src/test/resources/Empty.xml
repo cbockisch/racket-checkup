@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+<drracket>
+	<comment>
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+	</comment>
+	<terminal value='#reader' line='3' type='HashName' />
+	<paren type='round' line='3'>
+		<terminal value='lib' line='3' type='Name' />
+		<terminal
+			value='&quot;htdp-intermediate-lambda-reader.ss&quot;' line='3'
+			type='String' />
+		<terminal value='&quot;lang&quot;' line='3' type='String' />
+	</paren>
+	<paren type='round' line='3'>
+		<paren type='round' line='3'>
+			<terminal value='modname' line='3' type='Name' />
+			<terminal value='AllForms' line='3' type='Name' />
+		</paren>
+		<paren type='round' line='3'>
+			<terminal value='read-case-sensitive' line='3' type='Name' />
+			<terminal value='true' line='3' type='Boolean' />
+		</paren>
+		<paren type='round' line='3'>
+			<terminal value='teachpacks' line='3' type='Name' />
+			<paren type='round' line='3'>
+				<paren type='round' line='3'>
+					<terminal value='lib' line='3' type='Name' />
+					<terminal value='&quot;image.rkt&quot;' line='3'
+						type='String' />
+					<terminal value='&quot;teachpack&quot;' line='3'
+						type='String' />
+					<terminal value='&quot;2htdp&quot;' line='3' type='String' />
+				</paren>
+				<paren type='round' line='3'>
+					<terminal value='lib' line='3' type='Name' />
+					<terminal value='&quot;universe.rkt&quot;' line='3'
+						type='String' />
+					<terminal value='&quot;teachpack&quot;' line='3'
+						type='String' />
+					<terminal value='&quot;2htdp&quot;' line='3' type='String' />
+				</paren>
+				<paren type='round' line='3'>
+					<terminal value='lib' line='3' type='Name' />
+					<terminal value='&quot;batch-io.rkt&quot;' line='3'
+						type='String' />
+					<terminal value='&quot;teachpack&quot;' line='3'
+						type='String' />
+					<terminal value='&quot;2htdp&quot;' line='3' type='String' />
+				</paren>
+			</paren>
+		</paren>
+		<paren type='round' line='3'>
+			<terminal value='htdp-settings' line='3' type='Name' />
+			<vector line='3'>
+				<paren type='round' line='3'>
+					<terminal value='true' line='3' type='Boolean' />
+					<terminal value='constructor' line='3' type='Name' />
+					<terminal value='repeating-decimal' line='3' type='Name' />
+					<terminal value='false' line='3' type='Boolean' />
+					<terminal value='true' line='3' type='Boolean' />
+					<terminal value='none' line='3' type='Name' />
+					<terminal value='false' line='3' type='Boolean' />
+					<paren type='round' line='3'>
+						<paren type='round' line='3'>
+							<terminal value='lib' line='3' type='Name' />
+							<terminal value='&quot;image.rkt&quot;' line='3'
+								type='String' />
+							<terminal value='&quot;teachpack&quot;' line='3'
+								type='String' />
+							<terminal value='&quot;2htdp&quot;' line='3'
+								type='String' />
+						</paren>
+						<paren type='round' line='3'>
+							<terminal value='lib' line='3' type='Name' />
+							<terminal value='&quot;universe.rkt&quot;' line='3'
+								type='String' />
+							<terminal value='&quot;teachpack&quot;' line='3'
+								type='String' />
+							<terminal value='&quot;2htdp&quot;' line='3'
+								type='String' />
+						</paren>
+						<paren type='round' line='3'>
+							<terminal value='lib' line='3' type='Name' />
+							<terminal value='&quot;batch-io.rkt&quot;' line='3'
+								type='String' />
+							<terminal value='&quot;teachpack&quot;' line='3'
+								type='String' />
+							<terminal value='&quot;2htdp&quot;' line='3'
+								type='String' />
+						</paren>
+					</paren>
+					<terminal value='false' line='3' type='Boolean' />
+				</paren>
+			</vector>
+		</paren>
+	</paren>
+</drracket>
