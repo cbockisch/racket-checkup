@@ -1,11 +1,6 @@
 package io.bitbucket.plt.autotutor.racket.interpret;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.nio.charset.Charset;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,6 +21,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DefaultErrorStrategy;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -181,4 +177,11 @@ public class DrRacketInterpreter {
 		else
 			return "No parse errors.";	
 	}
+
+	// Nick did this 3.5
+	public void toXMLFile(String fileName) throws IOException {
+		File file = new File("../Bachelor_Arbeit_stuff/XMLfromRacket/" + fileName);
+		FileUtils.writeStringToFile(file, xml, (Charset) null);
+	}
+
 }

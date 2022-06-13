@@ -17,13 +17,67 @@ class InterpreterTest {
 		assertEquals("value=\"0\"", interpreter.interpretWithXQuery("(//paren/terminal)[last()]/attribute::value"));
 	}
 
+
 	@Test
-	void testDefaultQuery() throws Exception {
-		String rktFile = IOUtils.toString(ClassLoader.getSystemResourceAsStream("Demo.rkt"), Charset.defaultCharset());
-		
+	void testReduceXMLtoValue() throws Exception{
+		String rktFile = IOUtils.toString(ClassLoader.getSystemResourceAsStream("DemoResult.rkt"), Charset.defaultCharset());
+
 		DrRacketInterpreter interpreter = new DrRacketInterpreter(rktFile);
-		
-		assertEquals("value=\"0\"", interpreter.interpretWithXQuery());
+
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"0\"/></drracket>", interpreter.interpretWithXQuery());
+
+	}
+
+	@Test
+	void testReduceBasicOperations() throws Exception{
+		String rktFileDiv = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDivision.rkt"), Charset.defaultCharset());
+		String rktFilePlus = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleAddition.rkt"), Charset.defaultCharset());
+		String rktFileSub = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleSubtraktion.rkt"), Charset.defaultCharset());
+		String rktFileMult = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleMultiplikation.rkt"), Charset.defaultCharset());
+
+		DrRacketInterpreter interpreter = new DrRacketInterpreter(rktFilePlus);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"42\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(rktFileSub);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"67\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(rktFileMult);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"16\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(rktFileDiv);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"4\"/></drracket>", interpreter.interpretWithXQuery());
+	}
+
+
+	@Test
+	void testNestedFunctions() throws Exception{
+		String rktFileSimpleNested = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleNestedCalc.rkt"), Charset.defaultCharset());
+		String rktFileNested = IOUtils.toString(ClassLoader.getSystemResourceAsStream("nestedCalc.rkt"), Charset.defaultCharset());
+		String rktFileBigNested = IOUtils.toString(ClassLoader.getSystemResourceAsStream("bigNestedCalc.rkt"), Charset.defaultCharset());
+		String rktFileBigNested1 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("nestedCalc1.rkt"), Charset.defaultCharset());
+
+
+		DrRacketInterpreter interpreter = new DrRacketInterpreter(rktFileSimpleNested);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"17\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(rktFileNested);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"8\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(rktFileBigNested1);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"1221\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(rktFileBigNested);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"249\"/></drracket>", interpreter.interpretWithXQuery());
+
 	}
 
 }

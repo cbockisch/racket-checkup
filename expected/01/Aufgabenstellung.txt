@@ -1,0 +1,10 @@
+Laden Sie DrRacket (http://racket-lang.org) herunter und führen Sie die Installation durch.
+
+b) Stellen Sie als Sprache "How To Design Programs - Anfänger" ein (Sprache -> Sprache auswählen).
+
+c) Fügen Sie die Teachpacks universe und 2htdp/image hinzu (Sprache -> Teachpack hinzufügen).
+
+d) Werten Sie den Ausdruck (+ 17 25) im Interaktionsbereich von DrRacket aus (ohne Wertung).
+
+e) Schreiben Sie den Ausdruck (+ 17 25) in den Definitionsbereich von DrRacket.
+Speichern Sie das Programm aus dem Definitionsbereich in der Datei A11.rkt und führen das Auto-Testat damit durch.

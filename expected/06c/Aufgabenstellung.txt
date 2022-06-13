@@ -1,0 +1,14 @@
+In der Vorlesung haben Sie bereits Listen kennengelernt und gesehen, wie Sie damit arbeiten. In dieser Aufgabe sollen Sie eine nützliche Listenfunktionen implementieren.
+
+Sie dürfen nur die eingebauten Funktionen empty?, cons, first, rest, cons? und equal? benutzen, sowie die eingebaute Konstante empty und die eingebauten check-* Funktionen. Ansonsten dürfen Sie nur selbst definierte Funktionen aufrufen.
+
+(list-flat l) klopft die Liste l flach. Sie dürfen zusätzlich die eingebaute Funktion append benutzen.
+
+Verwenden Sie als Typ des Funktionsparameters:
+
+; [X] Nested-List-of X is one of:
+; - X
+; - (list-of (Nested-List-of X))
+
+Beispiel:
+(list-flat (list (list 1) 2 (list (list 3 4) 5) (list (list empty)))) ->* (list 1 2 3 4 5)

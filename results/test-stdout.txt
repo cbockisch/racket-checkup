@@ -1,0 +1,4 @@
+(lambda args ...)
+(lambda args ...)
+(lambda args ...)
+(lambda args ...)

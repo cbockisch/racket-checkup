@@ -1,0 +1,3 @@
+Programmieren Sie eine Funktion und beachten Sie dabei das Entwurfsrezept:
+
+(rome num), die die römische Darstellung der übergebenen Zahl zurückliefert. Benutzen Sie hierfür einen cond-Ausdruck Sie müssen dabei lediglich die Zahlen 1-9 betrachten, für alle anderen Werte soll die Funktion den String "Nicht implementiert" liefern. Beispiel: (rome 4) = "IV".

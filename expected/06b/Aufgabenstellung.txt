@@ -1,0 +1,8 @@
+In der Vorlesung haben Sie bereits Listen kennengelernt und gesehen, wie Sie damit arbeiten. In dieser Aufgabe sollen Sie eine nützliche Listenfunktionen implementieren.
+
+Sie dürfen nur die eingebauten Funktionen empty?, cons, first, rest, cons? und equal? benutzen, sowie die eingebaute Konstante empty und die eingebauten check-* Funktionen. Ansonsten dürfen Sie nur selbst definierte Funktionen aufrufen.
+
+(list-reverse l) dreht den Inhalt der Liste um. Sie dürfen zusätzlich die eingebaute Funktion append benutzen.
+
+Beispiel:
+(list-reverse (list 1 2 3)) ->* (list 3 2 1)

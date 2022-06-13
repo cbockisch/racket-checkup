@@ -1,0 +1,16 @@
+(require "Test-Harness.rkt")
+
+(assert/equal "I" (rome 1) "Der römische Zahl für 1")
+(assert/equal "II" (rome 2) "Der römische Zahl für 2")
+(assert/equal "III" (rome 3) "Der römische Zahl für 3")
+(assert/equal "IV" (rome 4) "Der römische Zahl für 4")
+(assert/equal "V" (rome 5) "Der römische Zahl für 5")
+(assert/equal "VI" (rome 6) "Der römische Zahl für 6")
+(assert/equal "VII" (rome 7) "Der römische Zahl für 7")
+(assert/equal "VIII" (rome 8) "Der römische Zahl für 8")
+(assert/equal "IX" (rome 9) "Der römische Zahl für 9")
+(assert/equal "Nicht implementiert" (rome 0) "Fehlercode bei unerlaubtem Argument 0")
+(assert/equal "Nicht implementiert" (rome 10) "Fehlercode bei unerlaubtem Argument 10")
+(assert/equal "Nicht implementiert" (rome -1) "Fehlercode bei unerlaubtem Argument -1")
+
+(tear-down)

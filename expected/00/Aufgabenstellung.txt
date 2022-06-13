@@ -1,0 +1,8 @@
+Stellen Sie in DrRacket das Sprach-Niveau Advanced Student Language ein
+und stellen Sie sicher dass die Teachpacks universe, image und abstraction auswewählt sind.
+
+Schreiben Sie eine Funktion sum mit einem Parameter.
+Die Funktion soll rekursiv die Summe aller Zahlen von 1 bis zu der angegebenen Grenze berechnen.
+Die Funktion soll nach dem Entwurfsrezept aus der Vorlesung definiert werden.
+
+Rufen Sie die Funktion mit dem Argument 10 auf.

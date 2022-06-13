@@ -1,0 +1,5 @@
+In der Vorlesung haben Sie bereits Listen kennengelernt und gesehen, wie Sie damit arbeiten. In dieser Aufgabe sollen Sie eine nützliche Listenfunktionen implementieren.
+
+Sie dürfen nur die eingebauten Funktionen empty?, cons, first, rest, cons? und equal? benutzen, sowie die eingebaute Konstante empty und die eingebauten check-* Funktionen. Ansonsten dürfen Sie nur selbst definierte Funktionen aufrufen.
+
+(list-remove e l) entfernt alle Vorkommen von e aus der Liste l und liefert die resultierende Liste. Benutzen Sie für den Vergleich equal?.

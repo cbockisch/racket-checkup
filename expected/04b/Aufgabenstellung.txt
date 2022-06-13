@@ -1,0 +1,5 @@
+In der Vorlesung haben Sie die posn-Struktur kennengelernt. Wir möchten nun einige Funktionen auf dieser Struktur implementieren. Achten Sie dabei darauf, das Entwurfsrezept anzuwenden.
+
+Dort wo die untenstehende Funktion einen Vektor erwarten, soll auch in der Signatur der Typ Vektor angegeben werden. Definieren Sie den Typ Vektor als Kommentar. Verwenden Sie hier die Struktur Posn wieder. Ein Vektor ist eine Posn-Struktur wobei die beiden Felder jeweils ein Number sind.
+
+(vec-sub v1 v2), die die übergebenen Vektoren subtrahiert.
