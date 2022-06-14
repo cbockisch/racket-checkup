@@ -80,4 +80,15 @@ class InterpreterTest {
 
 	}
 
+	@Test
+	void ifTest() throws Exception{
+		String rktSimpleIf = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleIf.rkt"), Charset.defaultCharset());
+
+		DrRacketInterpreter interpreter = new DrRacketInterpreter(rktSimpleIf);
+
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"9\"/></drracket>", interpreter.interpretWithXQuery());
+
+	}
+
 }

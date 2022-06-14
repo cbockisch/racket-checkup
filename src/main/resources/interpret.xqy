@@ -37,13 +37,13 @@ declare function local:nestedFunction($var){
         local:dispatch($var/child::*)
     )
     else(
-                local:checkFinished(<paren>
-                    {insert-before(remove($var/child::*, local:findFirstParen($var/child::*,1)),
-                        local:findFirstParen($var/child::*,1), local:nestedFunction($var/child::*[local:findFirstParen($var/child::*,1)]))}
+        local:checkFinished(<paren>
+            {insert-before(remove($var/child::*, local:findFirstParen($var/child::*,1)),
+             local:findFirstParen($var/child::*,1),
+             local:nestedFunction($var/child::*[local:findFirstParen($var/child::*,1)]))}
                 </paren>
                 )
     )
-
 };
 
 
@@ -86,21 +86,41 @@ declare function local:dispatch($var){
 
     if($var/@value = "+")then(
         local:interpretPlus($var/following-sibling::terminal/@value)
-        )
+    )
     else(
     if($var/@value = "-")then(
         local:interpretMinus($var/following-sibling::terminal/@value)
-            )
+    )
     else(
     if($var/@value = "*")then(
         local:interpretMultiplikation($var/following-sibling::terminal/@value)
-                )
+    )
     else(
     if($var/@value = "/")then(
         local:interpretDivision($var/following-sibling::terminal/@value)
-                )
+    )
     else(
-    $var
+    if($var/@value = "<")then(
+        local:interpretSmaller($var/following-sibling::terminal/@value)
+    )
+    else(
+    if($var/@value = ">")then(
+        local:interpretBigger($var/following-sibling::terminal/@value)
+    )
+    else(
+    if($var/@value = "=")then(
+        local:interpretEqual($var/following-sibling::terminal/@value)
+    )
+    else(
+    if($var/@value = "if")then(
+        local:interpretIf($var)
+    )
+    else(
+        $var
+    )
+    )
+    )
+    )
     )
     )
     )
@@ -120,9 +140,30 @@ declare function local:dispatch($var){
 
 
 
+declare function local:interpretSmaller($var){
+    <terminal value="{number($var[1]) < number($var[2])}"></terminal>
+};
+
+declare function local:interpretBigger($var){
+    <terminal value="{number($var[1]) > number($var[2])}"></terminal>
+};
+
+declare function local:interpretEqual($var){
+    <terminal value="{number($var[1]) = number($var[2])}"></terminal>
+};
 
 
+(:
 
+:)
+declare function local:interpretIf($var){
+
+    if($var[2]/@value = "true") then(
+        $var[3])
+    else(
+        $var[4]
+    )
+};
 
 
 (:
