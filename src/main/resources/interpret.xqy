@@ -16,9 +16,16 @@ return $x/parent::*;
 (:
 TODO
 
-nach einander funktionen/constanten einführen
+local/lambda
 
-keine Namen mehrfach vergeben
+Wenn vereinfachende Annahmen -> notizen, sonderlösung finden
+
+Single Constants does not work
+
+:)
+
+(:
+TODO
 
 local/lambda
 
@@ -27,27 +34,102 @@ Wenn vereinfachende Annahmen -> notizen, sonderlösung finden
 
 :)
 
+
+
+
 (:
 -Unnötige Zeilen entfernen
 -vielleicht irgendwann, je nach Anforderung auf Sprachniveau überprüfen
 :)
 declare function local:interpretDrracket($drracket as node()*) {
-    <drracket>
-        {local:checkFinished($drracket)}
-    </drracket>
+    if (not(local:checkIfNamesUnique(1, 2))) then (
+        "sry leider doppelt benannte Funktionen/Konstanten"
+    )
+    else (
+        if (local:checkIfUsedEarly(1, 2)) then (
+            "sry leider wurden irgendwo Funktionen benutzt bevor sie definiert wurden"
+        )
+        else (
+            <drracket>
+                {local:checkFinished($drracket)}
+            </drracket>
+        )
+    )
+
+
 };
 
 
 (:
-überprüft ob es mehrere äußere Klammern in $var gibt
+- Überprüft ob alle Namen der Funktionen/Konstanten unikate sind
 :)
-declare function local:checkFinished($var){
+declare function local:checkIfNamesUnique($counterAll, $counterPer){
 
-    if (count($var) > 1) then (
-        local:checkIsTerminal(local:removeDefine($var, 1))
+    if ($allDefines[$counterAll]/child::*[2]/@value = $allDefines[$counterPer]/child::*[2]/@value or
+            $allDefines[$counterAll]/child::*[2]/@value = $allDefines[$counterPer]/child::*[2]/child::*[1]/@value or
+            $allDefines[$counterAll]/child::*[2]/child::*[1]/@value = $allDefines[$counterPer]/child::*[2]/@value or
+            $allDefines[$counterAll]/child::*[2]/child::*[1]/@value = $allDefines[$counterPer]/child::*[2]/child::*[1]/@value)
+    then (
+        false()
     )
     else (
-        local:checkIsTerminal($var)
+        if ($counterAll > count($allDefines)) then (
+            true()
+        )
+        else (
+            if ($counterPer > count($allDefines)) then (
+                local:checkIfNamesUnique($counterAll + 1, $counterAll + 2)
+            )
+            else (
+                local:checkIfNamesUnique($counterAll, $counterPer + 1)
+            )
+        )
+    )
+};
+
+
+(:
+- Überprüft ob Funktionen nur Funktionen aufrufen, welche bereits definiert wurden
+:)
+declare function local:checkIfUsedEarly($counterAll, $counterPer){
+
+    if ($counterAll > count($allDefines)) then (
+        false()
+    )
+    else (
+        if ($counterPer > count($allDefines)) then (
+            false() or local:checkIfUsedEarly($counterAll + 1, $counterAll + 2)
+        )
+        else (
+            if (name($allDefines[$counterPer]/child::*[2]) = "terminal") then (
+                local:containsThis($allDefines[$counterAll], $allDefines[$counterPer]/child::*[2]/@value)
+                        or local:checkIfUsedEarly($counterAll, $counterPer + 1)
+            )
+            else (
+                local:containsThis($allDefines[$counterAll],
+                        $allDefines[$counterPer]/child::*[2]/child::*[1]/@value)
+                        or local:checkIfUsedEarly($counterAll, $counterPer + 1)
+            )
+        )
+    )
+};
+
+
+declare function local:containsThis($seq, $value){
+    $seq/descendant::*/@value = $value
+};
+
+
+(:
+überprüft ob es mehrere äußere Klammern in $seq gibt
+:)
+declare function local:checkFinished($seq){
+
+    if (count($seq) > 1) then (
+        local:checkIsTerminal(local:removeDefine($seq, 1))
+    )
+    else (
+        local:checkIsTerminal($seq)
     )
 };
 
@@ -55,15 +137,15 @@ declare function local:checkFinished($var){
 (:
 überprüft ob node ein terminal ist
 :)
-declare function local:checkIsTerminal($var){
+declare function local:checkIsTerminal($seq){
 
-    if (fn:name($var) = "terminal") then (
+    if (fn:name($seq) = "terminal") then (
         <terminal>
-            {$var/@value}
+            {$seq/@value}
         </terminal>
     )
     else (
-        local:nestedFunction($var)
+        local:nestedFunction($seq)
     )
 };
 
@@ -75,17 +157,17 @@ TODO
 - Sollte nacheinander eingefügt werden
     (Prüfen ob Funktion/Konstante andere Funktion/Konstante nutzen darf
 :)
-declare function local:removeDefine($original, $counter){
+declare function local:removeDefine($seq, $counter){
 
     if ($counter > count($allDefines)) then (
-        $original
+        $seq
     )
     else (
-        if ($original[1]/child::*[1]/@value = "define") then (
-            local:removeDefine(remove($original, 1), $counter + 1)
+        if ($seq[1]/child::*[1]/@value = "define") then (
+            local:removeDefine(remove($seq, 1), $counter + 1)
         )
         else (
-            local:removeDefine($original, $counter + 1)
+            local:removeDefine($seq, $counter + 1)
         )
     )
 };
@@ -98,28 +180,28 @@ rekursiv werden diese an dispatch übergeben
 -findet außerdem Funktionen und Konstanten
 übergibt diese an Funktionen in denen sie ersetzt werden
 :)
-declare function local:nestedFunction($var){
+declare function local:nestedFunction($seq){
 
-    if (local:isSeqIf($var/child::*)) then (
-        local:checkFinished(local:interpretIf($var/child::*))
+    if (local:isSeqIf($seq/child::*)) then (
+        local:checkFinished(local:interpretIf($seq/child::*))
     )
     else (
-        if (local:isSeqFunction($var/child::*, 1)) then (
-            local:nestedFunction(local:replaceFunction($var/child::*, 1))
+        if (local:isSeqFunction($seq/child::*, 1)) then (
+            local:nestedFunction(local:replaceFunction($seq/child::*, 1))
         )
         else (
-            if (local:isInSequenzConstant($var/child::*, 1, 1)) then (
-                local:nestedFunction(local:replaceConstant($var/child::*, 1, 1))
+            if (local:isInSequenzConstant($seq/child::*, 1, 1)) then (
+                local:nestedFunction(local:replaceConstant($seq/child::*, 1, 1))
             )
             else (
-                if (local:isSequenzTerminal($var/child::*, count($var/child::*))) then (
-                    local:dispatch($var/child::*)
+                if (local:isSequenzTerminal($seq/child::*, count($seq/child::*))) then (
+                    local:dispatch($seq/child::*)
                 )
                 else (
                     local:checkFinished(<paren>
-                        {insert-before(remove($var/child::*, local:findFirstParen($var/child::*, 1)),
-                                local:findFirstParen($var/child::*, 1),
-                                local:nestedFunction($var/child::*[local:findFirstParen($var/child::*, 1)]))}
+                        {insert-before(remove($seq/child::*, local:findFirstParen($seq/child::*, 1)),
+                                local:findFirstParen($seq/child::*, 1),
+                                local:nestedFunction($seq/child::*[local:findFirstParen($seq/child::*, 1)]))}
                     </paren>
                     )
                 )
@@ -181,10 +263,10 @@ If wird interpretiert
 :)
 declare function local:interpretIf($var){
 
-    if(local:checkFinished($var[2])/@value = "true") then(
+    if (local:checkFinished($var[2])/@value = "true") then (
         $var[3]
     )
-    else(
+    else (
         $var[4]
     )
 };

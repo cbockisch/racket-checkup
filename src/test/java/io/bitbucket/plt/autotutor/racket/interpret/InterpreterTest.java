@@ -98,6 +98,7 @@ class InterpreterTest {
 		String rktComplexDefine = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunctionKomplex.rkt"), Charset.defaultCharset());
 		String rktRekDefine = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunctionRek.rkt"), Charset.defaultCharset());
 
+
 		DrRacketInterpreter interpreter = new DrRacketInterpreter(rktSimpleDefine);
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 				"<drracket><terminal value=\"20\"/></drracket>", interpreter.interpretWithXQuery());
