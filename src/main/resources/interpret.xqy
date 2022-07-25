@@ -100,29 +100,37 @@ rekursiv werden diese an dispatch übergeben
 :)
 declare function local:nestedFunction($var){
 
-    if (local:isSeqFunction($var/child::*, 1)) then (
-        local:nestedFunction(
-                local:replaceFunction($var/child::*, 1))
+    if (local:isSeqIf($var/child::*)) then (
+        local:checkFinished(local:interpretIf($var/child::*))
     )
     else (
-        if (local:isInSequenzConstant($var/child::*, 1, 1)) then (
-            local:nestedFunction(
-                    local:replaceConstant($var/child::*, 1, 1))
+        if (local:isSeqFunction($var/child::*, 1)) then (
+            local:nestedFunction(local:replaceFunction($var/child::*, 1))
         )
         else (
-            if (local:isSequenzTerminal($var/child::*, count($var/child::*))) then (
-                local:dispatch($var/child::*)
+            if (local:isInSequenzConstant($var/child::*, 1, 1)) then (
+                local:nestedFunction(local:replaceConstant($var/child::*, 1, 1))
             )
             else (
-                local:checkFinished(<paren>
-                    {insert-before(remove($var/child::*, local:findFirstParen($var/child::*, 1)),
-                            local:findFirstParen($var/child::*, 1),
-                            local:nestedFunction($var/child::*[local:findFirstParen($var/child::*, 1)]))}
-                </paren>
+                if (local:isSequenzTerminal($var/child::*, count($var/child::*))) then (
+                    local:dispatch($var/child::*)
+                )
+                else (
+                    local:checkFinished(<paren>
+                        {insert-before(remove($var/child::*, local:findFirstParen($var/child::*, 1)),
+                                local:findFirstParen($var/child::*, 1),
+                                local:nestedFunction($var/child::*[local:findFirstParen($var/child::*, 1)]))}
+                    </paren>
+                    )
                 )
             )
         )
     )
+};
+
+
+declare function local:isSeqIf($seq){
+    $seq[1]/@value = "if"
 };
 
 
@@ -142,6 +150,7 @@ declare function local:isSeqFunction($seq, $counterFunc){
         )
     )
 };
+
 
 (:
 Überprüft ob in einer Sequenz eine Konstante enthalten ist
@@ -163,6 +172,20 @@ declare function local:isInSequenzConstant($var, $counterSequenz, $counterDefine
                 false() or local:isInSequenzConstant($var, $counterSequenz, $counterDefine + 1)
             )
         )
+    )
+};
+
+
+(:
+If wird interpretiert
+:)
+declare function local:interpretIf($var){
+
+    if(local:checkFinished($var[2])/@value = "true") then(
+        $var[3]
+    )
+    else(
+        $var[4]
     )
 };
 
@@ -342,19 +365,6 @@ declare function local:dispatch($var){
                 )
             )
         )
-    )
-};
-
-
-(:
-If wird interpretiert
-:)
-declare function local:interpretIf($var){
-
-    if ($var[2]/@value = "true") then (
-        $var[3])
-    else (
-        $var[4]
     )
 };
 

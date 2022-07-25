@@ -91,4 +91,24 @@ class InterpreterTest {
 
 	}
 
+
+	@Test
+	void defineTest() throws Exception{
+		String rktSimpleDefine = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunction.rkt"), Charset.defaultCharset());
+		String rktComplexDefine = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunctionKomplex.rkt"), Charset.defaultCharset());
+		String rktRekDefine = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunctionRek.rkt"), Charset.defaultCharset());
+
+		DrRacketInterpreter interpreter = new DrRacketInterpreter(rktSimpleDefine);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"20\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(rktComplexDefine);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"36\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(rktRekDefine);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"10\"/></drracket>", interpreter.interpretWithXQuery());
+	}
+
 }

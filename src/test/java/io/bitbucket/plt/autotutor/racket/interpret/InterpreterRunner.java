@@ -14,13 +14,13 @@ class InterpreterRunner {
 
 
 	public static void main(String[] args) throws Exception {
-		String rktFile = IOUtils.toString(ClassLoader.getSystemResourceAsStream("deepFunction.rkt"), Charset.defaultCharset());
+		String rktFile = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunctionRek.rkt"), Charset.defaultCharset());
 //		String rktFile = IOUtils.toString(ClassLoader.getSystemResourceAsStream("Assignment03a.rkt"), Charset.defaultCharset());
 
 
 		DrRacketInterpreter interpreter = new DrRacketInterpreter(rktFile);
 
-		interpreter.toXMLFile("deepFunction.xml");
+		interpreter.toXMLFile("defineFunctionRek.xml");
 /*
 		System.out.println("INPUT FILE");
 		System.out.println("==========");
