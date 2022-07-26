@@ -16,25 +16,17 @@ return $x/parent::*;
 (:
 TODO
 
-local/lambda
+-local
+
+-lambda
 
 Wenn vereinfachende Annahmen -> notizen, sonderlösung finden
 
+Bugreport:
 Single Constants does not work
+wenn man seine Variablen bennent wie Funktionen welche erst weiter unten definiert sind, dann wird ein Fehler erzeugt
 
 :)
-
-(:
-TODO
-
-local/lambda
-
-globale variablen verändern?
-Wenn vereinfachende Annahmen -> notizen, sonderlösung finden
-
-:)
-
-
 
 
 (:
@@ -115,8 +107,11 @@ declare function local:checkIfUsedEarly($counterAll, $counterPer){
 };
 
 
+(:
+gibt an ob ein bestimmtes Value irgendwo in einer Sequenz auftaucht
+:)
 declare function local:containsThis($seq, $value){
-    $seq/descendant::*/@value = $value
+    $seq/descendant-or-self::*/@value = $value
 };
 
 
@@ -154,8 +149,6 @@ entfernt rekursiv alle Konstanten und Funktionen aus dem Programm
 
 TODO
 - Hierbei sollten lokale Definitionen ausgenommen werden
-- Sollte nacheinander eingefügt werden
-    (Prüfen ob Funktion/Konstante andere Funktion/Konstante nutzen darf
 :)
 declare function local:removeDefine($seq, $counter){
 

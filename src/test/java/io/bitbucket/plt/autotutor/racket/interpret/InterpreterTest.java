@@ -112,4 +112,31 @@ class InterpreterTest {
 				"<drracket><terminal value=\"10\"/></drracket>", interpreter.interpretWithXQuery());
 	}
 
+
+	@Test
+	void nameDoubleTest() throws Exception{
+
+		String rktFile = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunctionDoubleNames.rkt"), Charset.defaultCharset());
+
+		DrRacketInterpreter interpreter = new DrRacketInterpreter(rktFile);
+		assertEquals("\"sry leider doppelt benannte Funktionen/Konstanten\"", interpreter.interpretWithXQuery());
+	}
+
+
+	@Test
+	void usedBeforeDefineTest() throws Exception{
+
+		String rktFile = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunctionUsedBeforeDefine.rkt"));
+
+		DrRacketInterpreter interpreter = new DrRacketInterpreter(rktFile);
+		assertEquals("\"sry leider wurden irgendwo Funktionen benutzt bevor sie definiert wurden\"", interpreter.interpretWithXQuery());
+
+	}
+
+
+
+
+
+
+
 }
