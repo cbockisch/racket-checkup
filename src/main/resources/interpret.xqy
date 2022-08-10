@@ -13,18 +13,27 @@ declare variable $allFunctions := for $x in $allDefines[..]/*[2]/self::*
 where name($x) = "paren"
 return $x/parent::*;
 
+declare variable $allStructs := (<paren line="4" type="round">
+    <terminal line="4" type="Name" value="define-struct"/>
+    <terminal line="4" type="Name" value="posn"/>
+    <paren line="4" type="round">
+        <terminal line="4" type="Name" value="x"/>
+        <terminal line="4" type="Name" value="y"/>
+    </paren>
+</paren>, ./drracket/*[attribute::line > 3]/*[attribute::value = "define-struct"]/parent::*);
 (:
 TODO
 
--local
-
--lambda
+-structs !!
 
 Wenn vereinfachende Annahmen -> notizen, sonderlösung finden
+
+Notizen zu Problemen
 
 Bugreport:
 Single Constants does not work
 wenn man seine Variablen bennent wie Funktionen welche erst weiter unten definiert sind, dann wird ein Fehler erzeugt
+Funktionen bevor sie definiert wurden anpassen
 
 :)
 
@@ -34,21 +43,19 @@ wenn man seine Variablen bennent wie Funktionen welche erst weiter unten definie
 -vielleicht irgendwann, je nach Anforderung auf Sprachniveau überprüfen
 :)
 declare function local:interpretDrracket($drracket as node()*) {
+
     if (not(local:checkIfNamesUnique(1, 2))) then (
         "sry leider doppelt benannte Funktionen/Konstanten"
     )
     else (
-        if (local:checkIfUsedEarly(1, 2)) then (
+    (:    if (local:checkIfUsedEarly(1, 2)) then (
             "sry leider wurden irgendwo Funktionen benutzt bevor sie definiert wurden"
         )
-        else (
-            <drracket>
-                {local:checkFinished($drracket)}
-            </drracket>
-        )
+        else ( :)
+    <drracket>
+        {local:checkFinished($drracket)}
+    </drracket>
     )
-
-
 };
 
 
@@ -79,7 +86,7 @@ declare function local:checkIfNamesUnique($counterAll, $counterPer){
     )
 };
 
-
+(:
 (:
 - Überprüft ob Funktionen nur Funktionen aufrufen, welche bereits definiert wurden
 :)
@@ -105,7 +112,7 @@ declare function local:checkIfUsedEarly($counterAll, $counterPer){
         )
     )
 };
-
+:)
 
 (:
 gibt an ob ein bestimmtes Value irgendwo in einer Sequenz auftaucht
@@ -152,11 +159,12 @@ TODO
 :)
 declare function local:removeDefine($seq, $counter){
 
-    if ($counter > count($allDefines)) then (
+    if ($counter > count($allDefines) + count($allStructs) - 1) then (
         $seq
     )
     else (
-        if ($seq[1]/child::*[1]/@value = "define") then (
+        if ($seq[1]/child::*[1]/@value = "define" or
+                $seq[1]/child::*[1]/@value = "define-struct") then (
             local:removeDefine(remove($seq, 1), $counter + 1)
         )
         else (
@@ -179,28 +187,153 @@ declare function local:nestedFunction($seq){
         local:checkFinished(local:interpretIf($seq/child::*))
     )
     else (
-        if (local:isSeqFunction($seq/child::*, 1)) then (
-            local:nestedFunction(local:replaceFunction($seq/child::*, 1))
+        if (local:isSeqCond($seq/child::*)) then (
+            local:nestedFunction(
+                    local:replaceCondWithIf($seq/child::*, 2))
         )
         else (
-            if (local:isInSequenzConstant($seq/child::*, 1, 1)) then (
-                local:nestedFunction(local:replaceConstant($seq/child::*, 1, 1))
+            if (local:isSeqFunction($seq/child::*, 1)) then (
+                local:nestedFunction(local:replaceFunction($seq/child::*, 1))
             )
             else (
-                if (local:isSequenzTerminal($seq/child::*, count($seq/child::*))) then (
-                    local:dispatch($seq/child::*)
+                if (local:isInSequenzConstant($seq/child::*, 1, 1)) then (
+                    local:nestedFunction(local:replaceConstant($seq/child::*, 1, 1))
                 )
                 else (
-                    local:checkFinished(<paren>
-                        {insert-before(remove($seq/child::*, local:findFirstParen($seq/child::*, 1)),
-                                local:findFirstParen($seq/child::*, 1),
-                                local:nestedFunction($seq/child::*[local:findFirstParen($seq/child::*, 1)]))}
-                    </paren>
+                    if (local:isForDispatch($seq)) then (
+                        local:dispatch($seq/child::*)
+                    )
+                    else (
+                        local:checkFinished(<paren>
+                            {insert-before(remove($seq/child::*, local:findFirstParen($seq/child::*, 1)),
+                                    local:findFirstParen($seq/child::*, 1),
+                                    local:nestedFunction($seq/child::*[local:findFirstParen($seq/child::*, 1)]))}
+                        </paren>
+                        )
                     )
                 )
             )
         )
     )
+};
+
+
+declare function local:isForDispatch($seq){
+
+    local:isSequenzTerminal($seq/child::*, count($seq/child::*)) or
+            (:
+  Sonderfälle in denen überprüft wird ob der ggf. geschachtelte Struct fertig ausgewertet ist
+  :)
+    local:isStructPredReady($seq/child::*) or
+
+            local:isNestedStruct($seq/child::*)
+
+};
+
+
+declare function local:isNestedStruct($seq){
+
+    local:isStructSizeRigth($seq) and
+            local:terminalOrStruct($seq, 2)
+
+};
+
+
+declare function local:isStructPredReady($seq){
+(:
+    hier wird gecheckt ob der Aufruf nach diesem struct korrekt ist
+    :)
+    count(local:getStruct(substring($seq[1]/@value, 1, string-length($seq[1]/@value) - 1))) = 1
+    (:
+    hier wird überprüft ob der Rest nur aus terminalen und structs besteht
+    :)
+            and
+            local:terminalOrStruct($seq[2]/child::*, 2)
+};
+
+
+declare function local:terminalOrStruct($seq, $counter){
+
+    if ($counter > count($seq)) then (
+        true()
+    )
+    else (
+        if (name($seq[$counter]) = "terminal") then (
+            true() and local:terminalOrStruct($seq, $counter + 1)
+        )
+        else (
+            if (name($seq[$counter]) = "paren" and local:isStruct($seq[$counter]/child::*[1], 1)) then (
+                true()
+                        and
+                        local:terminalOrStruct($seq[$counter]/child::*, 2)
+                        and
+                        local:isStructSizeRigth($seq[$counter]/child::*)
+            )
+            else (
+                false()
+            )
+        )
+    )
+
+
+};
+
+
+declare function local:isStruct($var, $counter){
+
+    if ($counter > count($allStructs)) then (
+        false()
+    )
+    else (
+        if (concat("make-", $allStructs[$counter]/child::*[2]/@value) = $var[1]/@value) then (
+            true()
+        )
+        else (
+            local:isStruct($var, $counter + 1)
+        )
+    )
+};
+
+
+declare function local:isStructSizeRigth($var){
+    ((count(local:getStruct(substring($var[1]/@value, 6))/child::*[3]/child::*) + 1) = count($var))
+            and
+            count(local:getStruct(substring($var[1]/@value, 6))/child::*[3]/child::*) > 0
+};
+
+
+declare function local:getStruct($structName){
+    $allStructs/*[attribute::value = $structName]/parent::*
+};
+
+
+(:
+
+
+:)
+declare function local:replaceCondWithIf($seq, $counter){
+
+    if ($seq[$counter]/child::*[1]/@value = "else" or
+            $seq[$counter]/child::*[1]/@value = "true") then (
+        $seq[$counter]/child::*[2]
+    )
+    else (
+        if ($counter > count($seq)) then (
+            <terminal value="cond: all question results were false"></terminal>
+        )
+        else (
+            <paren>
+                <terminal value="if"></terminal>
+                {$seq[$counter]/child::*}
+                {local:replaceCondWithIf($seq, $counter + 1)}
+            </paren>
+        )
+    )
+};
+
+
+declare function local:isSeqCond($seq){
+    $seq[1]/@value = "cond"
 };
 
 
@@ -428,11 +561,19 @@ declare function local:dispatch($var){
                                 mathe:interpretEqual($var/following-sibling::terminal/@value)
                             )
                             else (
-                                if ($var/@value = "if") then (
-                                    local:interpretIf($var)
+                                if (local:isStruct($var, 1)) then (
+                                    local:interpretStruct($var)
                                 )
                                 else (
-                                    $var
+                                    if (local:isStructPredReady($var)) then (
+                                        substring($var[1]/@value, 1, string-length($var[1]/@value) - 1)
+                                                = substring($var[2]/child::*[1]/@value, 6)
+                                                and
+                                                local:interpretStructPred($var[2]/child::*, 2)
+                                    )
+                                    else (
+                                        $var
+                                    )
                                 )
                             )
                         )
@@ -440,6 +581,39 @@ declare function local:dispatch($var){
                 )
             )
         )
+    )
+};
+
+
+declare function local:interpretStructPred($var, $counter){
+
+    local:isStructSizeRigth($var)  and
+            (
+                if($counter > count($var)) then (
+                    true()
+                )
+                else(
+                    if(name($var[$counter]) = "paren") then (
+                        local:interpretStructPred($var[$counter]/child::*, 2)
+                    )
+                    else(
+                        local:interpretStructPred($var, $counter + 1)
+                    )
+                )
+            )
+
+};
+
+
+declare function local:interpretStruct($var){
+    if ( count(local:getStruct(substring($var[1]/@value, 6))/child::*[3]/child::*) + 1 = count($var)
+    and not($var/@value = "not the correct struct Struktur")) then (
+        <paren>
+            {$var}
+        </paren>
+    )
+    else (
+        <terminal value= "not the correct struct Struktur"></terminal>
     )
 };
 
