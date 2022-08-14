@@ -152,10 +152,7 @@ declare function local:checkIsTerminal($seq){
 };
 
 (:
-entfernt rekursiv alle Konstanten und Funktionen aus dem Programm
-
-TODO
-- Hierbei sollten lokale Definitionen ausgenommen werden
+entfernt rekursiv alle Konstanten und Funktionen und Structs aus dem Programm
 :)
 declare function local:removeDefine($seq, $counter){
 
@@ -175,11 +172,9 @@ declare function local:removeDefine($seq, $counter){
 
 
 (:
--findet auswertbare kinder von "paren" einträgen
-rekursiv werden diese an dispatch übergeben
-
--findet außerdem Funktionen und Konstanten
-übergibt diese an Funktionen in denen sie ersetzt werden
+läuft rekursiv durch das ganze Programm
+findet Sonderfälle (funktionen, konstanten, if , etc.) und gibt diese an jeweilige Methoden die damit umgehen
+in diesem Sinne eine große Dispatch Funktion
 :)
 declare function local:nestedFunction($seq){
 
@@ -218,40 +213,52 @@ declare function local:nestedFunction($seq){
 };
 
 
+(:
+Überprüft ob der node bereit ist für die Auswertung mit primitiven Funktionen
+:)
 declare function local:isForDispatch($seq){
 
     local:isSequenzTerminal($seq/child::*, count($seq/child::*)) or
             (:
-  Sonderfälle in denen überprüft wird ob der ggf. geschachtelte Struct fertig ausgewertet ist
-  :)
+    Sonderfälle in denen überprüft wird ob der ggf. geschachtelte Struct fertig ausgewertet ist
+            :)
     local:isStructPredReady($seq/child::*) or
 
-            local:isNestedStruct($seq/child::*)
+    local:isNestedStruct($seq/child::*)
 
 };
 
 
+(:
+überprüft ob struct die richtige Größe hat und ob die Kinder ebenfalls korrekt definiert sind
+:)
 declare function local:isNestedStruct($seq){
 
     local:isStructSizeRigth($seq) and
-            local:terminalOrStruct($seq, 2)
-
+    local:terminalOrStruct($seq, 2)
 };
 
 
+(:
+überprüft ob struct die richtige Größe hat, zuvor definiert wurde und ob die Kinder ebenfalls korrekt definiert sind
+:)
 declare function local:isStructPredReady($seq){
 (:
-    hier wird gecheckt ob der Aufruf nach diesem struct korrekt ist
-    :)
+  hier wird gecheckt ob der struct zuvor definiert wurde
+  :)
     count(local:getStruct(substring($seq[1]/@value, 1, string-length($seq[1]/@value) - 1))) = 1
     (:
-    hier wird überprüft ob der Rest nur aus terminalen und structs besteht
-    :)
-            and
-            local:terminalOrStruct($seq[2]/child::*, 2)
+  hier wird überprüft ob der Rest nur aus terminalen und structs besteht
+  :)
+            and local:terminalOrStruct($seq[2]/child::*, 2)
+
+            and local:isStructSizeRigth($seq[2]/child::*)
 };
 
 
+(:
+überprüft ob ein Struct und seine Kinder nur aus Structs und Terminalen besteht
+:)
 declare function local:terminalOrStruct($seq, $counter){
 
     if ($counter > count($seq)) then (
@@ -274,11 +281,12 @@ declare function local:terminalOrStruct($seq, $counter){
             )
         )
     )
-
-
 };
 
 
+(:
+überprüft ob ein make-struct in den Definitionen ist
+:)
 declare function local:isStruct($var, $counter){
 
     if ($counter > count($allStructs)) then (
@@ -295,21 +303,25 @@ declare function local:isStruct($var, $counter){
 };
 
 
+(:
+überprüft bei einem struct ob er die richtige Größe hat
+:)
 declare function local:isStructSizeRigth($var){
     ((count(local:getStruct(substring($var[1]/@value, 6))/child::*[3]/child::*) + 1) = count($var))
             and
             count(local:getStruct(substring($var[1]/@value, 6))/child::*[3]/child::*) > 0
 };
 
-
+(:
+gets a struct from $allStructs by name
+:)
 declare function local:getStruct($structName){
     $allStructs/*[attribute::value = $structName]/parent::*
 };
 
 
 (:
-
-
+wandelt rekursiv einen Cond Ausdruck in einen if-else Ausdruck um
 :)
 declare function local:replaceCondWithIf($seq, $counter){
 
@@ -565,14 +577,11 @@ declare function local:dispatch($var){
                                     local:interpretStruct($var)
                                 )
                                 else (
-                                    if (local:isStructPredReady($var)) then (
-                                        substring($var[1]/@value, 1, string-length($var[1]/@value) - 1)
-                                                = substring($var[2]/child::*[1]/@value, 6)
-                                                and
-                                                local:interpretStructPred($var[2]/child::*, 2)
+                                    if(local:isStructPred($var, 1) ) then(
+                                        local:interpretPred($var)
                                     )
-                                    else (
-                                        $var
+                                    else(
+                                        local:interpretStruct($var)
                                     )
                                 )
                             )
@@ -585,29 +594,45 @@ declare function local:dispatch($var){
 };
 
 
-declare function local:interpretStructPred($var, $counter){
+(:
+checkt ob der struct? in $allStructs vorhanden ist
+:)
+declare function local:isStructPred($var, $counter){
 
-    local:isStructSizeRigth($var)  and
-            (
-                if($counter > count($var)) then (
-                    true()
-                )
-                else(
-                    if(name($var[$counter]) = "paren") then (
-                        local:interpretStructPred($var[$counter]/child::*, 2)
-                    )
-                    else(
-                        local:interpretStructPred($var, $counter + 1)
-                    )
-                )
-            )
+    if($counter > count($allStructs)) then(
+        false()
+    )
+    else(
+        if($allStructs[$counter]/child::*[2]/@value = substring($var[1]/@value, 1, string-length($var[1]/@value) - 1)) then (
+            true()
+        )
+        else(
+            local:isStructPred($var, $counter + 1)
+        )
+    )
+};
 
+(:
+interpretiert die Abfrage nach einem bestimmten Struct entweder zu einem boolean
+oder bei einem Fehler wird String mit Fehlermeldung weitergegeben
+:)
+declare function local:interpretPred($var){
+    if(local:isBustedStruct($var)) then(
+        <terminal value= "not the correct struct Struktur"></terminal>
+    )
+    else(
+        substring($var[1]/@value, 1, string-length($var[1]/@value) - 1) = substring($var[2]/child::*[1]/@value, 6)
+    )
 };
 
 
+(:
+überprüft ob struct richtige Größe hat und nicht bereits eine Fehlermeldung enthält
+struct wird erzeugt oder ggf. stattdessen eine Fehlermeldung
+:)
 declare function local:interpretStruct($var){
-    if ( count(local:getStruct(substring($var[1]/@value, 6))/child::*[3]/child::*) + 1 = count($var)
-    and not($var/@value = "not the correct struct Struktur")) then (
+    if ( local:isStructSizeRigth($var)
+            and not(local:isBustedStruct($var))) then (
         <paren>
             {$var}
         </paren>
@@ -615,6 +640,14 @@ declare function local:interpretStruct($var){
     else (
         <terminal value= "not the correct struct Struktur"></terminal>
     )
+};
+
+
+(:
+checkt ob struct eine Fehlermeldung enthält
+:)
+declare function local:isBustedStruct($var){
+    $var/@value = "not the correct struct Struktur"
 };
 
 

@@ -225,15 +225,24 @@ class InterpreterTest {
 		String simplePred = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPred.rkt"), Charset.defaultCharset());
 		String errorPred = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPredFalse.rkt"), Charset.defaultCharset());
 		String errorPred2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPredFalse2.rkt"), Charset.defaultCharset());
+		String errorPred3 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPredFalse3.rkt"), Charset.defaultCharset());
+		String errorPred4 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPredFalse4.rkt"), Charset.defaultCharset());
+
 
 		DrRacketInterpreter interpreter = new DrRacketInterpreter(simplePred);
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket>true</drracket>", interpreter.interpretWithXQuery());
 
 		interpreter = new DrRacketInterpreter(errorPred);
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket>not the correct struct Struktur</drracket>", interpreter.interpretWithXQuery());
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"not the correct struct Struktur\"/></drracket>", interpreter.interpretWithXQuery());
 
 		interpreter = new DrRacketInterpreter(errorPred2);
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket>not the correct struct Struktur</drracket>", interpreter.interpretWithXQuery());
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"not the correct struct Struktur\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(errorPred3);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"not the correct struct Struktur\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(errorPred4);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"not the correct struct Struktur\"/></drracket>", interpreter.interpretWithXQuery());
 
 
 	}
