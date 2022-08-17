@@ -21,19 +21,31 @@ declare variable $allStructs := (<paren line="4" type="round">
         <terminal line="4" type="Name" value="y"/>
     </paren>
 </paren>, ./drracket/*[attribute::line > 3]/*[attribute::value = "define-struct"]/parent::*);
+
+
 (:
+
 TODO
 
--structs !!
+-and
+
+-Fehlerübergabe vor dispatch
 
 Wenn vereinfachende Annahmen -> notizen, sonderlösung finden
 
 Notizen zu Problemen
 
 Bugreport:
+
+ergänze Fehlermeldungen, wenn es passt, insbesondere auf #Funktionsargumenten muss geachtet werden
+
 Single Constants does not work
+
 wenn man seine Variablen bennent wie Funktionen welche erst weiter unten definiert sind, dann wird ein Fehler erzeugt
-Funktionen bevor sie definiert wurden anpassen
+
+Funktionen bevor sie definiert wurden anpassen (scope eines Aufrufes)
+
+something like (fahrrad-reifen (make-fahr ...)) could be a problem
 
 :)
 
@@ -114,6 +126,7 @@ declare function local:checkIfUsedEarly($counterAll, $counterPer){
 };
 :)
 
+
 (:
 gibt an ob ein bestimmtes Value irgendwo in einer Sequenz auftaucht
 :)
@@ -150,6 +163,7 @@ declare function local:checkIsTerminal($seq){
         local:nestedFunction($seq)
     )
 };
+
 
 (:
 entfernt rekursiv alle Konstanten und Funktionen und Structs aus dem Programm
@@ -196,7 +210,7 @@ declare function local:nestedFunction($seq){
                 )
                 else (
                     if (local:isForDispatch($seq)) then (
-                        local:dispatch($seq/child::*)
+                        local:containsError($seq/child::*)
                     )
                     else (
                         local:checkFinished(<paren>
@@ -213,6 +227,28 @@ declare function local:nestedFunction($seq){
 };
 
 
+declare function local:containsError($seq){
+
+    if(local:containsThis($seq, "this function is not defined")) then(
+        <terminal value="this function is not defined"></terminal>
+    )
+    else(
+        if(local:containsThis($seq, "not the correct struct Struktur")) then(
+            <terminal value="not the correct struct Struktur"></terminal>
+        )
+        else(
+            if(local:containsThis($seq, "this is not the same struct :(")) then(
+                <terminal>"this is not the same struct :("</terminal>
+            )
+            else(
+                local:dispatch($seq)
+            )
+        )
+    )
+
+};
+
+
 (:
 Überprüft ob der node bereit ist für die Auswertung mit primitiven Funktionen
 :)
@@ -224,18 +260,20 @@ declare function local:isForDispatch($seq){
             :)
     local:isStructPredReady($seq/child::*) or
 
-    local:isNestedStruct($seq/child::*)
+            local:isNestedStruct($seq/child::*) or
+
+            local:isStructSelectReady($seq/child::*)
 
 };
 
 
 (:
-überprüft ob struct die richtige Größe hat und ob die Kinder ebenfalls korrekt definiert sind
+überprüft ob struct die richtige Größe hat und ob die Kinder des structs ebenfalls korrekt definiert sind
 :)
 declare function local:isNestedStruct($seq){
 
     local:isStructSizeRigth($seq) and
-    local:terminalOrStruct($seq, 2)
+            local:terminalOrStruct($seq, 2)
 };
 
 
@@ -253,6 +291,16 @@ declare function local:isStructPredReady($seq){
             and local:terminalOrStruct($seq[2]/child::*, 2)
 
             and local:isStructSizeRigth($seq[2]/child::*)
+};
+
+
+declare function local:isStructSelectReady($seq){
+
+(:einfach -1 wurde mir verboten:)
+
+            local:isStructSizeRigth($seq[2]/child::*)
+
+            and local:terminalOrStruct($seq[2]/child::*, 2)
 };
 
 
@@ -278,6 +326,31 @@ declare function local:terminalOrStruct($seq, $counter){
             )
             else (
                 false()
+            )
+        )
+    )
+};
+
+
+
+(:
+gibt die Position des Feldes zurück falls diese Struct-Feld Kombination existiert
+ansonsten wird -1 zurück gegeben
+:)
+declare function local:positionOfFieldInStruct($seq, $counterStruct, $counterField){
+
+    if ($counterStruct > count($allStructs)) then (
+                -1)
+    else (
+        if ($counterField > count($allStructs[$counterStruct]/child::*[3(:Konstante:)]/child::*)) then (
+            local:positionOfFieldInStruct($seq, $counterStruct + 1, 1))
+        else (
+            if ($seq[1]/@value = concat($allStructs[$counterStruct]/child::*[2(:konstante:)]/@value,
+                    concat("-",
+                            $allStructs[$counterStruct]/child::*[3(:Konstante:)]/child::*[$counterField]/@value))) then (
+                $counterField)
+            else (
+                local:positionOfFieldInStruct($seq, $counterStruct, $counterField + 1)
             )
         )
     )
@@ -541,7 +614,7 @@ as xs:integer{
 
 
 (:
-Verteilt vorimplementierte Funktionen auf eigentliche Funktionen
+Interpretiert vorimplementierte Funktionen auf eigentliche Funktionen
 :)
 declare function local:dispatch($var){
 
@@ -577,11 +650,17 @@ declare function local:dispatch($var){
                                     local:interpretStruct($var)
                                 )
                                 else (
-                                    if(local:isStructPred($var, 1) ) then(
+                                    if (local:isStructPred($var, 1)
+                                            and count($var) = 2 ) then (
                                         local:interpretPred($var)
                                     )
-                                    else(
-                                        local:interpretStruct($var)
+                                    else (
+                                        if (local:positionOfFieldInStruct($var, 1, 1) > xs:integer("-1")
+                                        and count($var) = 2) then (
+                                                local:getField($var)
+                                        ) else (
+                                            local:handleError($var)
+                                        )
                                     )
                                 )
                             )
@@ -591,7 +670,47 @@ declare function local:dispatch($var){
             )
         )
     )
+
 };
+
+
+
+declare function local:handleError($var){
+
+    if(local:isStructPred($var, 1) or
+            local:positionOfFieldInStruct($var, 1, 1) > xs:integer("-1")) then(
+
+        <terminal value="expects only 1 argument, but found more"></terminal>
+    )
+    else(
+
+        <terminal value="this function is not defined"></terminal>
+    )
+
+};
+
+
+(:
+gibt das Feld bei gleichen Structs und vorhandenem Feld,
+ansonsten wird eine Fehlermeldung generiert
+:)
+declare function local:getField($var){
+
+    if(
+    (:this one checks if the make-struct is equal to the start of
+     the struct-field query
+     something like (fahrrad-reifen (make-fahr ...)) could be a problem:)
+
+    substring($var[1]/@value,1,  string-length(substring($var[2]/child::*[1]/@value, 6))) = substring($var[2]/child::*[1]/@value, 6))
+
+    then(
+        $var[2]/child::*[local:positionOfFieldInStruct($var, 1, 1) + 1]
+    )
+    else(
+        <terminal>"this is not the same struct :("</terminal>
+    )
+};
+
 
 
 (:
@@ -599,14 +718,14 @@ checkt ob der struct? in $allStructs vorhanden ist
 :)
 declare function local:isStructPred($var, $counter){
 
-    if($counter > count($allStructs)) then(
+    if ($counter > count($allStructs)) then (
         false()
     )
-    else(
-        if($allStructs[$counter]/child::*[2]/@value = substring($var[1]/@value, 1, string-length($var[1]/@value) - 1)) then (
+    else (
+        if ($allStructs[$counter]/ child::*[2]/@value = substring($var[1]/@value, 1, string-length($var[1]/@value) - 1)) then (
             true()
         )
-        else(
+        else (
             local:isStructPred($var, $counter + 1)
         )
     )
@@ -617,11 +736,11 @@ interpretiert die Abfrage nach einem bestimmten Struct entweder zu einem boolean
 oder bei einem Fehler wird String mit Fehlermeldung weitergegeben
 :)
 declare function local:interpretPred($var){
-    if(local:isBustedStruct($var)) then(
-        <terminal value= "not the correct struct Struktur"></terminal>
+    if (local:isBustedStruct($var)) then (
+        <terminal value="not the correct struct Struktur"></terminal>
     )
-    else(
-        substring($var[1]/@value, 1, string-length($var[1]/@value) - 1) = substring($var[2]/child::*[1]/@value, 6)
+    else (
+        substring($var[1]/@value, 1, string-length($var[1]/@value) - 1) = substring($var[2]/ child::*[1]/@value, 6)
     )
 };
 
@@ -638,7 +757,7 @@ declare function local:interpretStruct($var){
         </paren>
     )
     else (
-        <terminal value= "not the correct struct Struktur"></terminal>
+        <terminal value="not the correct struct Struktur"></terminal>
     )
 };
 

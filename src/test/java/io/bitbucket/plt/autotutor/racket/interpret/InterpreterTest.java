@@ -83,12 +83,22 @@ class InterpreterTest {
 	@Test
 	void ifTest() throws Exception{
 		String rktSimpleIf = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleIf.rkt"), Charset.defaultCharset());
+		String rktIfF = IOUtils.toString(ClassLoader.getSystemResourceAsStream("ifWrongArgument.rkt"), Charset.defaultCharset());
+		String rktIfF2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("ifWrongArgument2.rkt"), Charset.defaultCharset());
+
 
 		DrRacketInterpreter interpreter = new DrRacketInterpreter(rktSimpleIf);
-
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 				"<drracket><terminal value=\"9\"/></drracket>", interpreter.interpretWithXQuery());
 
+
+		 interpreter = new DrRacketInterpreter(rktIfF);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"9\"/></drracket>", interpreter.interpretWithXQuery());
+
+		 interpreter = new DrRacketInterpreter(rktIfF);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"9\"/></drracket>", interpreter.interpretWithXQuery());
 	}
 
 
@@ -98,6 +108,9 @@ class InterpreterTest {
 		String rktComplexDefine = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunctionKomplex.rkt"), Charset.defaultCharset());
 		String rktRekDefine = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunctionRek.rkt"), Charset.defaultCharset());
 
+		String rktWrongFunc = IOUtils.toString(ClassLoader.getSystemResourceAsStream("wrongFunctionCall.rkt"), Charset.defaultCharset());
+		String rktWrongFuncA = IOUtils.toString(ClassLoader.getSystemResourceAsStream("wrongFunctionArgument.rkt"), Charset.defaultCharset());
+		String rktWrongFuncA2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("wrongFunctionArgument.rkt"), Charset.defaultCharset());
 
 		DrRacketInterpreter interpreter = new DrRacketInterpreter(rktSimpleDefine);
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
@@ -108,6 +121,17 @@ class InterpreterTest {
 				"<drracket><terminal value=\"36\"/></drracket>", interpreter.interpretWithXQuery());
 
 		interpreter = new DrRacketInterpreter(rktRekDefine);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"10\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(rktWrongFunc);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"this function is not defined\"/></drracket>" , interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(rktWrongFuncA);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+				"<drracket><terminal value=\"10\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(rktWrongFuncA2);
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 				"<drracket><terminal value=\"10\"/></drracket>", interpreter.interpretWithXQuery());
 	}
@@ -144,6 +168,10 @@ class InterpreterTest {
 		String nestedCond2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("nestedCond2.rkt"), Charset.defaultCharset());
 		String nestedCond3 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("nestedCond3.rkt"), Charset.defaultCharset());
 
+		String condF = IOUtils.toString(ClassLoader.getSystemResourceAsStream("condWrongArgument.rkt"), Charset.defaultCharset());
+		String condF2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("condWrongArgument2.rkt"), Charset.defaultCharset());
+
+
 
 		DrRacketInterpreter interpreter = new DrRacketInterpreter(simpleCond);
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"33\"/></drracket>", interpreter.interpretWithXQuery());
@@ -160,6 +188,12 @@ class InterpreterTest {
 		interpreter = new DrRacketInterpreter(nestedCond3);
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"11\"/></drracket>", interpreter.interpretWithXQuery());
 
+		interpreter = new DrRacketInterpreter(condF);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"11\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(condF2);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"11\"/></drracket>", interpreter.interpretWithXQuery());
+
 	}
 
 
@@ -168,6 +202,7 @@ class InterpreterTest {
 
 		String simpleMake = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStruct.rkt"), Charset.defaultCharset());
 		String nestedMake = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleNestedDefineStruct.rkt"),Charset.defaultCharset());
+
 		String falseMake1 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructFalse1.rkt"),Charset.defaultCharset());
 		String falseMake2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructFalse2.rkt"),Charset.defaultCharset());
 		String falseMake3 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructFalse3.rkt"),Charset.defaultCharset());
@@ -208,7 +243,7 @@ class InterpreterTest {
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"not the correct struct Struktur\"/></drracket>", interpreter.interpretWithXQuery());
 
 		interpreter = new DrRacketInterpreter(falseMake5);
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"not the correct struct Struktur\"/></drracket>", interpreter.interpretWithXQuery());
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"this function is not defined\"/></drracket>", interpreter.interpretWithXQuery());
 
 		interpreter = new DrRacketInterpreter(falseNested1);
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"not the correct struct Struktur\"/></drracket>", interpreter.interpretWithXQuery());
@@ -223,10 +258,13 @@ class InterpreterTest {
 	void structPredTest() throws Exception{
 
 		String simplePred = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPred.rkt"), Charset.defaultCharset());
+
 		String errorPred = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPredFalse.rkt"), Charset.defaultCharset());
 		String errorPred2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPredFalse2.rkt"), Charset.defaultCharset());
 		String errorPred3 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPredFalse3.rkt"), Charset.defaultCharset());
 		String errorPred4 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPredFalse4.rkt"), Charset.defaultCharset());
+		String errorPred6 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPredFalse6.rkt"), Charset.defaultCharset());
+
 
 
 		DrRacketInterpreter interpreter = new DrRacketInterpreter(simplePred);
@@ -236,16 +274,55 @@ class InterpreterTest {
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"not the correct struct Struktur\"/></drracket>", interpreter.interpretWithXQuery());
 
 		interpreter = new DrRacketInterpreter(errorPred2);
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"not the correct struct Struktur\"/></drracket>", interpreter.interpretWithXQuery());
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"this function is not defined\"/></drracket>", interpreter.interpretWithXQuery());
 
 		interpreter = new DrRacketInterpreter(errorPred3);
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"not the correct struct Struktur\"/></drracket>", interpreter.interpretWithXQuery());
 
 		interpreter = new DrRacketInterpreter(errorPred4);
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"not the correct struct Struktur\"/></drracket>", interpreter.interpretWithXQuery());
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"this function is not defined\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(errorPred6);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"expects only 1 argument, but found more\"/></drracket>", interpreter.interpretWithXQuery());
+
+	}
+
+
+
+	@Test
+	void structSelectTest() throws Exception{
+
+		String structSelect = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineStructSelect.rkt"), Charset.defaultCharset());
+		String structSelect2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineStructSelect2.rkt"), Charset.defaultCharset());
+
+		String structSelectF = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineStructSelectFalse.rkt"), Charset.defaultCharset());
+		String structSelectF2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineStructSelectFalse2.rkt"), Charset.defaultCharset());
+		String structSelectF3 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineStructSelectFalse3.rkt"), Charset.defaultCharset());
+		String structSelectF4 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineStructSelectFalse4.rkt"), Charset.defaultCharset());
+
+
+
+		DrRacketInterpreter interpreter = new DrRacketInterpreter(structSelect);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal line=\"6\" type=\"Number\" value=\"10\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(structSelect2);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"30\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(structSelectF);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"this function is not defined\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(structSelectF2);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"expects only 1 argument, but found more\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(structSelectF3);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal>\"this is not the same struct :(\"</terminal></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(structSelectF4);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"expects only 1 argument, but found more\"/></drracket>", interpreter.interpretWithXQuery());
 
 
 	}
+
 
 
 }
