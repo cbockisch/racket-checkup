@@ -93,18 +93,17 @@ class InterpreterTest {
 
 
 		 interpreter = new DrRacketInterpreter(rktIfF);
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-				"<drracket><terminal value=\"9\"/></drracket>", interpreter.interpretWithXQuery());
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"falsche Anzahl an Argumenten für If/Cond-Klausel\"/></drracket>", interpreter.interpretWithXQuery());
 
-		 interpreter = new DrRacketInterpreter(rktIfF);
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-				"<drracket><terminal value=\"9\"/></drracket>", interpreter.interpretWithXQuery());
+		 interpreter = new DrRacketInterpreter(rktIfF2);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"falsche Anzahl an Argumenten für If/Cond-Klausel\"/></drracket>", interpreter.interpretWithXQuery());
 	}
 
 
 	@Test
 	void defineTest() throws Exception{
 		String rktSimpleDefine = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunction.rkt"), Charset.defaultCharset());
+		String rktIdDefine = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunction2.rkt"), Charset.defaultCharset());
 		String rktComplexDefine = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunctionKomplex.rkt"), Charset.defaultCharset());
 		String rktRekDefine = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunctionRek.rkt"), Charset.defaultCharset());
 
@@ -128,12 +127,15 @@ class InterpreterTest {
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"this function is not defined\"/></drracket>" , interpreter.interpretWithXQuery());
 
 		interpreter = new DrRacketInterpreter(rktWrongFuncA);
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-				"<drracket><terminal value=\"10\"/></drracket>", interpreter.interpretWithXQuery());
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"this function expects different argument size\"/></drracket>", interpreter.interpretWithXQuery());
 
 		interpreter = new DrRacketInterpreter(rktWrongFuncA2);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"this function expects different argument size\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(rktIdDefine);
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-				"<drracket><terminal value=\"10\"/></drracket>", interpreter.interpretWithXQuery());
+				"<drracket><terminal value=\"3\"/></drracket>", interpreter.interpretWithXQuery());
+
 	}
 
 
@@ -189,10 +191,10 @@ class InterpreterTest {
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"11\"/></drracket>", interpreter.interpretWithXQuery());
 
 		interpreter = new DrRacketInterpreter(condF);
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"11\"/></drracket>", interpreter.interpretWithXQuery());
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"falsche Anzahl an Argumenten für If/Cond-Klausel\"/></drracket>", interpreter.interpretWithXQuery());
 
 		interpreter = new DrRacketInterpreter(condF2);
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"11\"/></drracket>", interpreter.interpretWithXQuery());
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"falsche Anzahl an Argumenten für If/Cond-Klausel\"/></drracket>", interpreter.interpretWithXQuery());
 
 	}
 

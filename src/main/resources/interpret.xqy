@@ -202,7 +202,7 @@ declare function local:nestedFunction($seq){
         )
         else (
             if (local:isSeqFunction($seq/child::*, 1)) then (
-                local:nestedFunction(local:replaceFunction($seq/child::*, 1))
+                local:checkFinished(local:replaceFunction($seq/child::*, 1))
             )
             else (
                 if (local:isInSequenzConstant($seq/child::*, 1, 1)) then (
@@ -229,23 +229,32 @@ declare function local:nestedFunction($seq){
 
 declare function local:containsError($seq){
 
-    if(local:containsThis($seq, "this function is not defined")) then(
+    if (local:containsThis($seq, "this function is not defined")) then (
         <terminal value="this function is not defined"></terminal>
     )
-    else(
-        if(local:containsThis($seq, "not the correct struct Struktur")) then(
+    else (
+        if (local:containsThis($seq, "not the correct struct Struktur")) then (
             <terminal value="not the correct struct Struktur"></terminal>
         )
-        else(
-            if(local:containsThis($seq, "this is not the same struct :(")) then(
-                <terminal>"this is not the same struct :("</terminal>
+        else (
+            if (local:containsThis($seq, "this is not the same struct :(")) then (
+                <terminal value="this is not the same struct :("></terminal>
             )
-            else(
-                local:dispatch($seq)
+            else (
+                if (local:containsThis($seq, "falsche Anzahl an Argumenten für If/Cond-Klausel")) then (
+                    <terminal value="falsche Anzahl an Argumenten für If/Cond-Klausel"></terminal>
+                )
+                else (
+                    if (local:containsThis($seq, "this function expects different argument size")) then (
+                        <terminal value="this function expects different argument size"></terminal>
+                    )
+                    else (
+                        local:dispatch($seq)
+                    )
+                )
             )
         )
     )
-
 };
 
 
@@ -298,7 +307,7 @@ declare function local:isStructSelectReady($seq){
 
 (:einfach -1 wurde mir verboten:)
 
-            local:isStructSizeRigth($seq[2]/child::*)
+    local:isStructSizeRigth($seq[2]/child::*)
 
             and local:terminalOrStruct($seq[2]/child::*, 2)
 };
@@ -330,7 +339,6 @@ declare function local:terminalOrStruct($seq, $counter){
         )
     )
 };
-
 
 
 (:
@@ -471,37 +479,65 @@ declare function local:isInSequenzConstant($var, $counterSequenz, $counterDefine
 
 (:
 If wird interpretiert
+check für richtige Argumentmenge
 :)
 declare function local:interpretIf($var){
 
-    if (local:checkFinished($var[2])/@value = "true") then (
-        $var[3]
+    if (count($var) = 4) then (
+        if (local:checkFinished($var[2])/@value = "true") then (
+            $var[3]
+        )
+        else (
+            $var[4]
+        )
     )
     else (
-        $var[4]
+        <terminal value="falsche Anzahl an Argumenten für If/Cond-Klausel"></terminal>
     )
 };
 
 
 (:
 Ersetzt einen Funktionsnamen durch den Funktionsbody
+gibt ggf Fehlermeldung zurück
 :)
 declare function local:replaceFunction($seq, $counterFunc){
 
     if ($counterFunc > count($allFunctions)) then (
-        $seq
+        <terminal value="this function is not defined"></terminal>
     )
     else (
         if ($seq[1]/@value = $allFunctions[$counterFunc]/child::*[2]/child::*[1]/@value) then (
+            if (local:argumentSizeRigth($seq)) then (
 
-            local:replaceVarInFunction(insert-before(remove($seq, 1), 1,
+                (:Hier wird Funktion weiter verarbeitet:)
+                local:replaceVarInFunction(insert-before(remove($seq, 1), 1,
                     $allFunctions[$counterFunc]/child::*[3]), 2,
                     $allFunctions[$counterFunc]/child::*[2]/child::*)
+            )
+            else (
+                <terminal value="this function expects different argument size"></terminal>
+            )
         )
         else (
             local:replaceFunction($seq, $counterFunc + 1)
         )
     )
+};
+
+
+(:
+überprüft ob Funktion korrekte Menge an Argumenten erhält
+:)
+declare function local:argumentSizeRigth($seq){
+    count(local:getFunction($seq[1]/@value)/*[2]/*) = count($seq)
+};
+
+(:
+gets a function from $allFunctions by name
+:)
+declare function local:getFunction($functionName){
+    $allFunctions/*[2]/*[1][attribute::value = $functionName]/parent::*/parent::*
 };
 
 
@@ -514,8 +550,14 @@ declare function local:replaceVarInFunction($seq, $counterV, $fHead){
         local:removeVars($seq, count($seq)))
     else (
 
-        local:replaceVarInFunction(insert-before(remove($seq, 1), 1,
-                local:replaceThisVar($seq[1]/child::*, $fHead[$counterV], 1, $seq[$counterV])), $counterV + 1, $fHead)
+        if(name($seq[1]) = "terminal")then(
+            local:replaceVarInFunction(insert-before(remove($seq, 1), 1,
+                    local:replaceThisVar($seq[1], $fHead[$counterV], 1, $seq[$counterV])), $counterV + 1, $fHead)/child::*
+        )else(
+
+            local:replaceVarInFunction(insert-before(remove($seq, 1), 1,
+                    local:replaceThisVar($seq[1]/child::*, $fHead[$counterV], 1, $seq[$counterV])), $counterV + 1, $fHead)
+        )
     )
 };
 
@@ -651,13 +693,13 @@ declare function local:dispatch($var){
                                 )
                                 else (
                                     if (local:isStructPred($var, 1)
-                                            and count($var) = 2 ) then (
+                                            and count($var) = 2) then (
                                         local:interpretPred($var)
                                     )
                                     else (
                                         if (local:positionOfFieldInStruct($var, 1, 1) > xs:integer("-1")
-                                        and count($var) = 2) then (
-                                                local:getField($var)
+                                                and count($var) = 2) then (
+                                            local:getField($var)
                                         ) else (
                                             local:handleError($var)
                                         )
@@ -674,15 +716,14 @@ declare function local:dispatch($var){
 };
 
 
-
 declare function local:handleError($var){
 
-    if(local:isStructPred($var, 1) or
-            local:positionOfFieldInStruct($var, 1, 1) > xs:integer("-1")) then(
+    if (local:isStructPred($var, 1) or
+            local:positionOfFieldInStruct($var, 1, 1) > xs:integer("-1")) then (
 
         <terminal value="expects only 1 argument, but found more"></terminal>
     )
-    else(
+    else (
 
         <terminal value="this function is not defined"></terminal>
     )
@@ -696,21 +737,20 @@ ansonsten wird eine Fehlermeldung generiert
 :)
 declare function local:getField($var){
 
-    if(
+    if (
     (:this one checks if the make-struct is equal to the start of
      the struct-field query
      something like (fahrrad-reifen (make-fahr ...)) could be a problem:)
 
-    substring($var[1]/@value,1,  string-length(substring($var[2]/child::*[1]/@value, 6))) = substring($var[2]/child::*[1]/@value, 6))
+    substring($var[1]/@value, 1, string-length(substring($var[2]/child::*[1]/@value, 6))) = substring($var[2]/child::*[1]/@value, 6))
 
-    then(
+    then (
         $var[2]/child::*[local:positionOfFieldInStruct($var, 1, 1) + 1]
     )
-    else(
+    else (
         <terminal>"this is not the same struct :("</terminal>
     )
 };
-
 
 
 (:
