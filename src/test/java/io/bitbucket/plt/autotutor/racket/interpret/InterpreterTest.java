@@ -107,6 +107,7 @@ class InterpreterTest {
 		String rktComplexDefine = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunctionKomplex.rkt"), Charset.defaultCharset());
 		String rktRekDefine = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineFunctionRek.rkt"), Charset.defaultCharset());
 
+
 		String rktWrongFunc = IOUtils.toString(ClassLoader.getSystemResourceAsStream("wrongFunctionCall.rkt"), Charset.defaultCharset());
 		String rktWrongFuncA = IOUtils.toString(ClassLoader.getSystemResourceAsStream("wrongFunctionArgument.rkt"), Charset.defaultCharset());
 		String rktWrongFuncA2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("wrongFunctionArgument.rkt"), Charset.defaultCharset());
@@ -137,6 +138,16 @@ class InterpreterTest {
 				"<drracket><terminal value=\"3\"/></drracket>", interpreter.interpretWithXQuery());
 
 	}
+
+	@Test
+	void singleConstant() throws Exception{
+
+		String rktFile = IOUtils.toString(ClassLoader.getSystemResourceAsStream("defineSingleConstant.rkt"), Charset.defaultCharset());
+
+		DrRacketInterpreter interpreter = new DrRacketInterpreter(rktFile);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"4\"/></drracket>", interpreter.interpretWithXQuery());
+	}
+
 
 
 	@Test

@@ -27,15 +27,10 @@ declare variable $allStructs := (<paren line="4" type="round">
 
 TODO
 
--and potenzielle kein boolean
 
 Wenn vereinfachende Annahmen -> notizen, sonderlösung finden
 
-Notizen zu Problemen
-
 Bugreport:
-
-Single Constants does not work
 
 wenn man seine Variablen bennent wie Funktionen welche erst weiter unten definiert sind, dann wird ein Fehler erzeugt
 
@@ -137,7 +132,7 @@ entfernt rekursiv alle Konstanten und Funktionen und Structs aus dem Programm
 declare function local:removeDefine($seq, $counter){
 
     if ($counter > count($allDefines) + count($allStructs) - 1) then (
-        local:checkIsTerminal($seq)
+        local:isSingleConstant($seq)
     )
     else (
         if ($seq[1]/child::*[1]/@value = "define" or
@@ -151,12 +146,22 @@ declare function local:removeDefine($seq, $counter){
 };
 
 
+declare function local:isSingleConstant($seq){
+
+    if(local:isInSequenzConstant($seq,1,1) and count($seq) = 1) then (
+        local:checkIsTerminal(local:replaceConstant($seq,1,1)/child::*)
+    )
+    else(
+        local:checkIsTerminal($seq)
+    )
+};
 
 
 (:
 überprüft ob node ein terminal ist
 :)
 declare function local:checkIsTerminal($seq){
+
 
     if (fn:name($seq) = "terminal") then (
         <terminal>
@@ -166,9 +171,8 @@ declare function local:checkIsTerminal($seq){
     else (
         local:nestedFunction($seq)
     )
+
 };
-
-
 
 
 (:
@@ -757,7 +761,6 @@ declare function local:handleError($var){
         <terminal value="expects only 1 argument, but found more"></terminal>
     )
     else (
-
         <terminal value="this function is not defined"></terminal>
     )
 
