@@ -27,17 +27,13 @@ declare variable $allStructs := (<paren line="4" type="round">
 
 TODO
 
--and
-
--Fehlerübergabe vor dispatch
+-and potenzielle kein boolean
 
 Wenn vereinfachende Annahmen -> notizen, sonderlösung finden
 
 Notizen zu Problemen
 
 Bugreport:
-
-ergänze Fehlermeldungen, wenn es passt, insbesondere auf #Funktionsargumenten muss geachtet werden
 
 Single Constants does not work
 
@@ -65,7 +61,7 @@ declare function local:interpretDrracket($drracket as node()*) {
         )
         else ( :)
     <drracket>
-        {local:checkFinished($drracket)}
+        {local:removeDefine($drracket, 1)}
     </drracket>
     )
 };
@@ -136,17 +132,25 @@ declare function local:containsThis($seq, $value){
 
 
 (:
-überprüft ob es mehrere äußere Klammern in $seq gibt
+entfernt rekursiv alle Konstanten und Funktionen und Structs aus dem Programm
 :)
-declare function local:checkFinished($seq){
+declare function local:removeDefine($seq, $counter){
 
-    if (count($seq) > 1) then (
-        local:checkIsTerminal(local:removeDefine($seq, 1))
-    )
-    else (
+    if ($counter > count($allDefines) + count($allStructs) - 1) then (
         local:checkIsTerminal($seq)
     )
+    else (
+        if ($seq[1]/child::*[1]/@value = "define" or
+                $seq[1]/child::*[1]/@value = "define-struct") then (
+            local:removeDefine(remove($seq, 1), $counter + 1)
+        )
+        else (
+            local:removeDefine($seq, $counter + 1)
+        )
+    )
 };
+
+
 
 
 (:
@@ -165,24 +169,6 @@ declare function local:checkIsTerminal($seq){
 };
 
 
-(:
-entfernt rekursiv alle Konstanten und Funktionen und Structs aus dem Programm
-:)
-declare function local:removeDefine($seq, $counter){
-
-    if ($counter > count($allDefines) + count($allStructs) - 1) then (
-        $seq
-    )
-    else (
-        if ($seq[1]/child::*[1]/@value = "define" or
-                $seq[1]/child::*[1]/@value = "define-struct") then (
-            local:removeDefine(remove($seq, 1), $counter + 1)
-        )
-        else (
-            local:removeDefine($seq, $counter + 1)
-        )
-    )
-};
 
 
 (:
@@ -193,7 +179,7 @@ in diesem Sinne eine große Dispatch Funktion
 declare function local:nestedFunction($seq){
 
     if (local:isSeqIf($seq/child::*)) then (
-        local:checkFinished(local:interpretIf($seq/child::*))
+        local:checkIsTerminal(local:interpretIf($seq/child::*))
     )
     else (
         if (local:isSeqCond($seq/child::*)) then (
@@ -201,23 +187,28 @@ declare function local:nestedFunction($seq){
                     local:replaceCondWithIf($seq/child::*, 2))
         )
         else (
-            if (local:isSeqFunction($seq/child::*, 1)) then (
-                local:checkFinished(local:replaceFunction($seq/child::*, 1))
+            if (local:isSeqAnd($seq/child::*)) then (
+                local:interpretAnd($seq/child::*)
             )
             else (
-                if (local:isInSequenzConstant($seq/child::*, 1, 1)) then (
-                    local:nestedFunction(local:replaceConstant($seq/child::*, 1, 1))
+                if (local:isSeqFunction($seq/child::*, 1)) then (
+                    local:checkIsTerminal(local:replaceFunction($seq/child::*, 1))
                 )
                 else (
-                    if (local:isForDispatch($seq)) then (
-                        local:containsError($seq/child::*)
+                    if (local:isInSequenzConstant($seq/child::*, 1, 1)) then (
+                        local:checkIsTerminal(local:replaceConstant($seq/child::*, 1, 1))
                     )
                     else (
-                        local:checkFinished(<paren>
-                            {insert-before(remove($seq/child::*, local:findFirstParen($seq/child::*, 1)),
-                                    local:findFirstParen($seq/child::*, 1),
-                                    local:nestedFunction($seq/child::*[local:findFirstParen($seq/child::*, 1)]))}
-                        </paren>
+                        if (local:isForDispatch($seq)) then (
+                            local:containsError($seq/child::*)
+                        )
+                        else (
+                            local:checkIsTerminal(<paren>
+                                {insert-before(remove($seq/child::*, local:findFirstParen($seq/child::*, 1)),
+                                        local:findFirstParen($seq/child::*, 1),
+                                        local:nestedFunction($seq/child::*[local:findFirstParen($seq/child::*, 1)]))}
+                            </paren>
+                            )
                         )
                     )
                 )
@@ -249,7 +240,15 @@ declare function local:containsError($seq){
                         <terminal value="this function expects different argument size"></terminal>
                     )
                     else (
-                        local:dispatch($seq)
+                        if (local:containsThis($seq, "falsche Anzahl an Argumenten für and-Klausel")) then (
+                            <terminal value="falsche Anzahl an Argumenten für and-Klausel"></terminal>)
+                        else (
+                            if (local:containsThis($seq, "falscher Argument Typ in and")) then (
+                                <terminal value="falscher Argument Typ in and"></terminal>)
+                            else (
+                                local:dispatch($seq)
+                            )
+                        )
                     )
                 )
             )
@@ -305,7 +304,6 @@ declare function local:isStructPredReady($seq){
 
 declare function local:isStructSelectReady($seq){
 
-(:einfach -1 wurde mir verboten:)
 
     local:isStructSizeRigth($seq[2]/child::*)
 
@@ -435,6 +433,41 @@ declare function local:isSeqIf($seq){
 };
 
 
+declare function local:isSeqAnd($seq){
+    $seq[1]/@value = "and"
+};
+
+
+(:
+If wird interpretiert
+check für richtige Argumentmenge
+:)
+declare function local:interpretAnd($var){
+
+    if (count($var) = 3) then (
+        if (local:checkIsTerminal($var[2])/@value = "true") then (
+            if (local:checkIsTerminal($var[3])/@value = "true"
+                    or local:checkIsTerminal($var[3])/@value = "false") then (
+                local:checkIsTerminal($var[3])
+            )
+            else (
+                <terminal value="falscher Argument Typ in and"></terminal>
+            )
+        )
+        else (
+            if (local:checkIsTerminal($var[2])/@value = "false") then (
+                <terminal value="false"></terminal>
+            )
+            else (
+                <terminal value="falscher Argument Typ in and"></terminal>
+            )
+        )
+    )
+    else (
+        <terminal value="falsche Anzahl an Argumenten für and-Klausel"></terminal>
+    )
+};
+
 (:
 Überprüft ob eine Sequenz eine Selbstdefinierte Funktion ist
 :)
@@ -484,7 +517,7 @@ check für richtige Argumentmenge
 declare function local:interpretIf($var){
 
     if (count($var) = 4) then (
-        if (local:checkFinished($var[2])/@value = "true") then (
+        if (local:checkIsTerminal($var[2])/@value = "true") then (
             $var[3]
         )
         else (
@@ -510,8 +543,8 @@ declare function local:replaceFunction($seq, $counterFunc){
         if ($seq[1]/@value = $allFunctions[$counterFunc]/child::*[2]/child::*[1]/@value) then (
             if (local:argumentSizeRigth($seq)) then (
 
-                (:Hier wird Funktion weiter verarbeitet:)
-                local:replaceVarInFunction(insert-before(remove($seq, 1), 1,
+            (:Hier wird Funktion weiter verarbeitet:)
+            local:replaceVarInFunction(insert-before(remove($seq, 1), 1,
                     $allFunctions[$counterFunc]/child::*[3]), 2,
                     $allFunctions[$counterFunc]/child::*[2]/child::*)
             )
@@ -549,15 +582,15 @@ declare function local:replaceVarInFunction($seq, $counterV, $fHead){
     if ($counterV > count($fHead)) then (
         local:removeVars($seq, count($seq)))
     else (
-
-        if(name($seq[1]) = "terminal")then(
-            local:replaceVarInFunction(insert-before(remove($seq, 1), 1,
-                    local:replaceThisVar($seq[1], $fHead[$counterV], 1, $seq[$counterV])), $counterV + 1, $fHead)/child::*
-        )else(
-
-            local:replaceVarInFunction(insert-before(remove($seq, 1), 1,
-                    local:replaceThisVar($seq[1]/child::*, $fHead[$counterV], 1, $seq[$counterV])), $counterV + 1, $fHead)
-        )
+    (:Ein Fall für die identitätsfuntkion und Funktionen die nur aus einem Wert bestehen:)
+    if (name($seq[1]) = "terminal") then (
+        local:replaceVarInFunction(insert-before(remove($seq, 1), 1,
+                local:replaceThisVar($seq[1], $fHead[$counterV], 1, $seq[$counterV])), $counterV + 1, $fHead)/child::*
+    ) else (
+    (:basicly für alle anderen Funktionen:)
+    local:replaceVarInFunction(insert-before(remove($seq, 1), 1,
+            local:replaceThisVar($seq[1]/child::*, $fHead[$counterV], 1, $seq[$counterV])), $counterV + 1, $fHead)
+    )
     )
 };
 

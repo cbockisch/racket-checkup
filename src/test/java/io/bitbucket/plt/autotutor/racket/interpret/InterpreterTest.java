@@ -325,6 +325,53 @@ class InterpreterTest {
 
 	}
 
+	@Test
+	void andTest() throws Exception{
+
+		String simpleAnd = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleAnd.rkt"), Charset.defaultCharset());
+		String simpleAnd2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleAnd2.rkt"), Charset.defaultCharset());
+		String simpleAnd3 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleAnd3.rkt"), Charset.defaultCharset());
+		String trickyAnd = IOUtils.toString(ClassLoader.getSystemResourceAsStream("trickyAnd.rkt"), Charset.defaultCharset());
+		String trickyAnd2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("trickyAnd2.rkt"), Charset.defaultCharset());
+
+
+		String wrongAnd = IOUtils.toString(ClassLoader.getSystemResourceAsStream("wrongSizeAnd.rkt"), Charset.defaultCharset());
+		String wrongAnd2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("wrongSizeAnd2.rkt"), Charset.defaultCharset());
+
+		String wrongAnd3 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("wrongTypeAnd.rkt"), Charset.defaultCharset());
+		String wrongAnd4 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("wrongTypeAnd2.rkt"), Charset.defaultCharset());
+
+
+
+		DrRacketInterpreter interpreter = new DrRacketInterpreter(simpleAnd);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"true\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(simpleAnd2);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"false\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(simpleAnd3);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"true\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(trickyAnd);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"false\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(trickyAnd2);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"10\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(wrongAnd);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"falsche Anzahl an Argumenten für and-Klausel\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(wrongAnd2);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"falsche Anzahl an Argumenten für and-Klausel\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(wrongAnd3);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"falscher Argument Typ in and\"/></drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(wrongAnd4);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"falscher Argument Typ in and\"/></drracket>", interpreter.interpretWithXQuery());
+
+	}
+
 
 
 }
