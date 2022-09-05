@@ -51,13 +51,9 @@ declare function local:interpretDrracket($drracket as node()*) {
         "sry leider doppelt benannte Funktionen/Konstanten"
     )
     else (
-    (:    if (local:checkIfUsedEarly(1, 2)) then (
-            "sry leider wurden irgendwo Funktionen benutzt bevor sie definiert wurden"
-        )
-        else ( :)
-    <drracket>
-        {local:removeDefine($drracket, 1)}
-    </drracket>
+        <drracket>
+            {local:removeDefine($drracket, 1)}
+        </drracket>
     )
 };
 
@@ -146,12 +142,15 @@ declare function local:removeDefine($seq, $counter){
 };
 
 
+(:
+identifiziert eine einzelne Konstante und wertet diese direkt aus
+:)
 declare function local:isSingleConstant($seq){
 
-    if(local:isInSequenzConstant($seq,1,1) and count($seq) = 1) then (
-        local:checkIsTerminal(local:replaceConstant($seq,1,1)/child::*)
+    if (local:isInSequenzConstant($seq, 1, 1) and count($seq) = 1) then (
+        local:checkIsTerminal(local:replaceConstant($seq, 1, 1)/child::*)
     )
-    else(
+    else (
         local:checkIsTerminal($seq)
     )
 };
@@ -161,7 +160,6 @@ declare function local:isSingleConstant($seq){
 überprüft ob node ein terminal ist
 :)
 declare function local:checkIsTerminal($seq){
-
 
     if (fn:name($seq) = "terminal") then (
         <terminal>
@@ -176,8 +174,7 @@ declare function local:checkIsTerminal($seq){
 
 
 (:
-läuft rekursiv durch das ganze Programm
-findet Sonderfälle (funktionen, konstanten, if , etc.) und gibt diese an jeweilige Methoden die damit umgehen
+läuft rekursiv durch das ganze Programm, findet Sonderfälle (funktionen, konstanten, if , etc.) und gibt diese an jeweilige Methoden die damit umgehen
 in diesem Sinne eine große Dispatch Funktion
 :)
 declare function local:nestedFunction($seq){
@@ -222,6 +219,11 @@ declare function local:nestedFunction($seq){
 };
 
 
+(:
+überprüft ob in der Sequenz irgendwo eine Fehlernachricht enthalten ist,
+gibt diese Fehlernachricht ggf. zurück oder
+übergibt die Sequenz in die dispatch Funktion
+:)
 declare function local:containsError($seq){
 
     if (local:containsThis($seq, "this function is not defined")) then (
@@ -270,11 +272,10 @@ declare function local:isForDispatch($seq){
             (:
     Sonderfälle in denen überprüft wird ob der ggf. geschachtelte Struct fertig ausgewertet ist
             :)
-    local:isStructPredReady($seq/child::*) or
 
             local:isNestedStruct($seq/child::*) or
 
-            local:isStructSelectReady($seq/child::*)
+            local:isStructSelectOrPredReady($seq/child::*)
 
 };
 
@@ -289,29 +290,15 @@ declare function local:isNestedStruct($seq){
 };
 
 
-(:
-überprüft ob struct die richtige Größe hat, zuvor definiert wurde und ob die Kinder ebenfalls korrekt definiert sind
-:)
-declare function local:isStructPredReady($seq){
-(:
-  hier wird gecheckt ob der struct zuvor definiert wurde
-  :)
-    count(local:getStruct(substring($seq[1]/@value, 1, string-length($seq[1]/@value) - 1))) = 1
-    (:
-  hier wird überprüft ob der Rest nur aus terminalen und structs besteht
-  :)
-            and local:terminalOrStruct($seq[2]/child::*, 2)
-
-            and local:isStructSizeRigth($seq[2]/child::*)
-};
 
 
-declare function local:isStructSelectReady($seq){
 
+declare function local:isStructSelectOrPredReady($seq){
 
     local:isStructSizeRigth($seq[2]/child::*)
 
             and local:terminalOrStruct($seq[2]/child::*, 2)
+
 };
 
 
@@ -528,6 +515,10 @@ declare function local:interpretIf($var){
             $var[4]
         )
     )
+
+    (:
+was wenn kein boolean rauskommt, verglichen mit "and", hier noch Fälle einfügen
+:)
     else (
         <terminal value="falsche Anzahl an Argumenten für If/Cond-Klausel"></terminal>
     )
@@ -540,25 +531,20 @@ gibt ggf Fehlermeldung zurück
 :)
 declare function local:replaceFunction($seq, $counterFunc){
 
-    if ($counterFunc > count($allFunctions)) then (
-        <terminal value="this function is not defined"></terminal>
-    )
-    else (
-        if ($seq[1]/@value = $allFunctions[$counterFunc]/child::*[2]/child::*[1]/@value) then (
-            if (local:argumentSizeRigth($seq)) then (
+    if ($seq[1]/@value = $allFunctions[$counterFunc]/child::*[2]/child::*[1]/@value) then (
+        if (local:argumentSizeRigth($seq)) then (
 
-            (:Hier wird Funktion weiter verarbeitet:)
-            local:replaceVarInFunction(insert-before(remove($seq, 1), 1,
-                    $allFunctions[$counterFunc]/child::*[3]), 2,
-                    $allFunctions[$counterFunc]/child::*[2]/child::*)
-            )
-            else (
-                <terminal value="this function expects different argument size"></terminal>
-            )
+        (:Hier wird Funktion weiter verarbeitet:)
+        local:replaceVarInFunction(insert-before(remove($seq, 1), 1,
+                $allFunctions[$counterFunc]/child::*[3]), 2,
+                $allFunctions[$counterFunc]/child::*[2]/child::*)
         )
         else (
-            local:replaceFunction($seq, $counterFunc + 1)
+            <terminal value="this function expects different argument size"></terminal>
         )
+    )
+    else (
+        local:replaceFunction($seq, $counterFunc + 1)
     )
 };
 
@@ -697,31 +683,31 @@ Interpretiert vorimplementierte Funktionen auf eigentliche Funktionen
 :)
 declare function local:dispatch($var){
 
-    if ($var/@value = "+") then (
+    if ($var[1]/@value = "+") then (
         mathe:interpretPlus($var/following-sibling::terminal/@value)
     )
     else (
-        if ($var/@value = "-") then (
+        if ($var[1]/@value = "-") then (
             mathe:interpretMinus($var/following-sibling::terminal/@value)
         )
         else (
-            if ($var/@value = "*") then (
+            if ($var[1]/@value = "*") then (
                 mathe:interpretMultiplikation($var/following-sibling::terminal/@value)
             )
             else (
-                if ($var/@value = "/") then (
+                if ($var[1]/@value = "/") then (
                     mathe:interpretDivision($var/following-sibling::terminal/@value)
                 )
                 else (
-                    if ($var/@value = "<") then (
+                    if ($var[1]/@value = "<") then (
                         mathe:interpretSmaller($var/following-sibling::terminal/@value)
                     )
                     else (
-                        if ($var/@value = ">") then (
+                        if ($var[1]/@value = ">") then (
                             mathe:interpretBigger($var/following-sibling::terminal/@value)
                         )
                         else (
-                            if ($var/@value = "=") then (
+                            if ($var[1]/@value = "=") then (
                                 mathe:interpretEqual($var/following-sibling::terminal/@value)
                             )
                             else (

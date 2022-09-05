@@ -271,6 +271,7 @@ class InterpreterTest {
 	void structPredTest() throws Exception{
 
 		String simplePred = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPred.rkt"), Charset.defaultCharset());
+		String simplePred2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPred2.rkt"), Charset.defaultCharset());
 
 		String errorPred = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPredFalse.rkt"), Charset.defaultCharset());
 		String errorPred2 = IOUtils.toString(ClassLoader.getSystemResourceAsStream("simpleDefineStructPredFalse2.rkt"), Charset.defaultCharset());
@@ -282,6 +283,9 @@ class InterpreterTest {
 
 		DrRacketInterpreter interpreter = new DrRacketInterpreter(simplePred);
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket>true</drracket>", interpreter.interpretWithXQuery());
+
+		interpreter = new DrRacketInterpreter(simplePred2);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket>false</drracket>", interpreter.interpretWithXQuery());
 
 		interpreter = new DrRacketInterpreter(errorPred);
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><drracket><terminal value=\"not the correct struct Struktur\"/></drracket>", interpreter.interpretWithXQuery());
